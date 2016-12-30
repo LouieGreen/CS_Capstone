@@ -15,7 +15,7 @@ import java.util.HashSet;
 
 public class Server {
 
-    private static final int PORT = 5000;
+    private static int portNum = 5000;
 	private static RSAPublicKey serverPubKey;
 	@SuppressWarnings("unused")
 	private static RSAPrivateKey serverPrivKey;
@@ -23,14 +23,23 @@ public class Server {
     private static HashSet<PrintWriter> writers = new HashSet<PrintWriter>();
     
     public static void main(String[] args) throws Exception {
-        System.out.println("The chat server is running.");
+    	if(args.length > 0) {
+    		try{
+    			portNum = Integer.parseInt(args[0]);
+    		}
+    		catch(Exception e) {
+    			System.out.println("Input a proper port number. Defaulting to port 5000.");
+    		}
+    	}
+    	
+        System.out.println("The chat server is running on port: " + portNum);
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
         keyGen.initialize(2048);
         KeyPair keyPair = keyGen.generateKeyPair();
         serverPubKey = (RSAPublicKey) keyPair.getPublic();
         serverPrivKey = (RSAPrivateKey) keyPair.getPrivate();
         
-        ServerSocket listener = new ServerSocket(PORT);
+        ServerSocket listener = new ServerSocket(portNum);
         try {
             while (true) {
                 new Handler(listener.accept()).start();
