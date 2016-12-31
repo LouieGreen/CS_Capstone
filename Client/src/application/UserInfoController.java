@@ -168,12 +168,12 @@ public class UserInfoController {
     				user.setPort(port);
     				
     				//save settings to file
-    				if(saveButton.isSelected()){
+    				if(saveButton.isSelected()) {
     					try {
     						PrintWriter p = new PrintWriter(settingsFile);
     						p.println(user.getServer() + "\n" + user.getName() + "\n" + user.getPort() + "\n"  + user.getColor() + "\n" + saveButton.isSelected());
     						p.close();
-    					} 
+    					}
     					catch (FileNotFoundException e1) {
     						e1.printStackTrace();
     					}
@@ -193,12 +193,12 @@ public class UserInfoController {
 						stage.setScene(new Scene(chat));
 						stage.setTitle("Chat Client: "+ user.getName());
 						stage.show();
-					} 
+					}
     				catch (IOException e1) {
 						e1.printStackTrace();
 					}
     			}
-    			else{
+    			else {
     				notFinished.setOpacity(1);
     			}
     		});
@@ -208,7 +208,7 @@ public class UserInfoController {
     	}
     }
     
-    public static User getUser(){
+    public static User getUser() {
     	return user;
     }
         

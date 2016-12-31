@@ -110,84 +110,41 @@ public class ChatController {
 			    // Process all messages from server, according to the protocol.
 			        while (true) {
 			            String line = in.readLine();
-			            if (line.startsWith("REQUESTNAME")) {
-			                out.println(user.getName() + " " + user.getColor());
-			            }
-			            else if(line.startsWith("NEWUSER")){
-			            	scanner = new Scanner(line);
-			            	
-			            	junk = scanner.next(); //eats NEWUSER
-			            	nameList.add(scanner.next()); //gets name
-			            	colorList.add(scanner.next()); //gets color
-			            	
-			            	scanner.close();
-			            	
-			            	Platform.runLater (() -> updateUserList());
-			            }
-			            else if (line.startsWith("CONNECTED")) {
-			                input.setEditable(true);
-			            }
-			            else if(line.startsWith("USER-UPDATE-MESSAGE")){
-			            	scanner = new Scanner(line);
-			            	
-			            	junk = scanner.next(); //eats CONNECTED-MESSAGE
-			            	String inUserName = scanner.next(); // gets name
-			            	String inUserColor = scanner.next(); //gets color
-			            	String inUserMessage = scanner.nextLine().trim(); //gets message
-			            	
-			            	Text t = new Text(inUserName + " " + inUserMessage + "\n"); //create text object with message
-			            	t.setStyle("-fx-fill: " + inUserColor + ";"); //set color
-			            	Platform.runLater (() -> {
-			            		chatFlow.getChildren().add(t); //add to chat
-			            		chatScroll.setVvalue(1); //set scroll to bottom so it scrolls with text
-			            	});
-			            }
-			            else if(line.startsWith("DISCONNECTED-MESSAGE")) {
-			            	scanner = new Scanner(line);
-			            	
-			            	junk = scanner.next(); //eats DISCONNECTED-MESSAGE
-			            	String inUserName = scanner.next(); // gets name
-			            	String inUserColor = scanner.next(); //gets color
-			            	String inUserMessage = scanner.nextLine().trim(); // gets message
-			            	
-			            	Text t = new Text(inUserName + " " + inUserMessage + "\n"); //create text object with message
-			            	t.setStyle("-fx-fill: " + inUserColor + ";"); //set color
-			            	Platform.runLater (() -> {
-			            		chatFlow.getChildren().add(t); //add to chat
-			            		chatScroll.setVvalue(1); //set scroll to bottom so it scrolls with text
-			            	});
-			            }
-			            else if(line.startsWith("REMOVEUSER")){
-			            	scanner = new Scanner(line);
-			            	junk = scanner.next(); //eats REMOVEUSER
-			            	String nameToRemove = scanner.next(); //get user name
-			            	
-			            	junk = scanner.nextLine(); //clear rest of line
-			            	
-			            	int i = nameList.indexOf(nameToRemove);
-			            	nameList.remove(i);
-			            	colorList.remove(i);
-			            	
-			            	Platform.runLater (() -> updateUserList());
-			            }
-			            else if (line.startsWith("MESSAGE")) {
-			            	scanner = new Scanner(line);
-			            	
-			            	junk = scanner.next(); //eat MESSAGE
-			            	String inUserName = scanner.next(); //gets name
-			            	String inUserColor = scanner.next(); //gets color
-			            	String inUserMessage = scanner.nextLine().trim(); //gets message
-			            	
-			            	Text t = new Text(inUserName + ": " +  inUserMessage + "\n"); //create text object with message
-			            	t.setStyle("-fx-fill: " + inUserColor + ";"); //set color
-			            	Platform.runLater (() -> {
-			            		chatFlow.getChildren().add(t); //add to chat
-			            		chatScroll.setVvalue(1); //set scroll to bottom so it scrolls with text
-			            	});
-			            	
-			            	scanner.close();
-			            }
-			        }
+			            
+				        if(line != null) {
+				        	scanner = new Scanner(line);
+				        	
+				            if (line.startsWith("MESSAGE") || line.startsWith("USER-UPDATE-MESSAGE") || line.startsWith("DISCONNECTED-MESSAGE")) {
+				            	addChatMessage(scanner);
+				            }
+				            else if (line.startsWith("CONNECTED")) {
+				                input.setEditable(true);
+				            }
+				            else if (line.startsWith("REQUESTNAME")) {
+				                out.println(user.getName() + " " + user.getColor());
+				            }
+				            else if(line.startsWith("NEWUSER")){
+				            	junk = scanner.next(); //eats NEWUSER
+				            	nameList.add(scanner.next()); //gets name
+				            	colorList.add(scanner.next()); //gets color
+				            	
+				            	Platform.runLater (() -> updateUserList());
+				            }
+				            else if(line.startsWith("REMOVEUSER")){
+				            	junk = scanner.next(); //eats REMOVEUSER
+				            	String nameToRemove = scanner.next(); //get user name
+				            	
+				            	junk = scanner.nextLine(); //clear rest of line
+				            	
+				            	int i = nameList.indexOf(nameToRemove);
+				            	nameList.remove(i);
+				            	colorList.remove(i);
+				            	
+				            	Platform.runLater (() -> updateUserList());
+				            }
+				            scanner.close();
+				        } //end if statement
+			        } //end while statement
 			    }
 			};
 			Thread th = new Thread(task);
@@ -211,16 +168,36 @@ public class ChatController {
 				chatScroll.setVvalue(1);
 			}
         });
-    }
+    } //end init
     
     private void updateUserList() {
     	namesFlow.getChildren().clear();
 		
-		for(int i=0; i<nameList.size(); i++){
+		for(int i=0; i<nameList.size(); i++){ 
 			Text t = new Text();
 			t.setText(nameList.get(i) + "\n");
 			t.setStyle("-fx-fill: " + colorList.get(i) + ";");
 			namesFlow.getChildren().add(t);
-		}		
+		}
 	}
+    
+    private void addChatMessage(Scanner scanner) {
+    	String header = scanner.next(); //eats header message
+    	String inUserName = scanner.next(); // gets name
+    	String inUserColor = scanner.next(); //gets color
+    	String inUserMessage = scanner.nextLine().trim(); //gets message
+    	
+    	Text t;
+    	if(header.equals("MESSAGE")) {
+    		t = new Text(inUserName + ": " +  inUserMessage + "\n"); //create text object with message
+    	}
+    	else {
+    		t = new Text(inUserName + " " + inUserMessage + "\n"); //create text object with message
+    	}
+    	t.setStyle("-fx-fill: " + inUserColor + ";"); //set color
+    	Platform.runLater (() -> {
+    		chatFlow.getChildren().add(t); //add to chat
+    		chatScroll.setVvalue(1); //set scroll to bottom so it scrolls with text
+    	});
+    }
 }
