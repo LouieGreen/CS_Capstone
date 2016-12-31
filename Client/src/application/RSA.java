@@ -28,19 +28,19 @@ public class RSA {
 			enc = cipher.doFinal(message.getBytes(StandardCharsets.UTF_8));
 		} 
         catch (IllegalBlockSizeException e) {
-			System.out.println("IllegalBlockSizeException, encryption failed.");
+			System.out.println("IllegalBlockSizeException, RSA encryption failed.");
 		}
         catch (BadPaddingException e) {
-			System.out.println("BadPaddingException, encryption failed.");
+			System.out.println("BadPaddingException, RSA encryption failed.");
 		}
         catch (NoSuchAlgorithmException e) {
-			System.out.println("NoSuchAlgorithmException, encryption failed.");
+			System.out.println("NoSuchAlgorithmException, RSA encryption failed.");
 		}
         catch (NoSuchPaddingException e) {
-			System.out.println("NoSuchPaddingException, encryption failed.");
+			System.out.println("NoSuchPaddingException, RSA encryption failed.");
 		}
         catch (InvalidKeyException e) {
-			System.out.println("InvalidKeyException, encryption failed.");
+			System.out.println("InvalidKeyException, RSA encryption failed.");
 		}
         
         return Base64.getEncoder().encodeToString(enc);
@@ -57,22 +57,22 @@ public class RSA {
 			plainText = oaepFromInit.doFinal(Base64.getDecoder().decode(encryptedMessage));
 		} 
     	catch (NoSuchAlgorithmException e) {
-			System.out.println("NoSuchAlgorithmException, encryption failed.");
+			System.out.println("NoSuchAlgorithmException, RSA encryption failed.");
 		}
     	catch (NoSuchPaddingException e) {
-			System.out.println("NoSuchPaddingException, encryption failed.");
+			System.out.println("NoSuchPaddingException, RSA encryption failed.");
 		}
     	catch (InvalidKeyException e) {
-			System.out.println("InvalidKeyException, encryption failed.");
+			System.out.println("InvalidKeyException, RSA encryption failed.");
 		}
     	catch (InvalidAlgorithmParameterException e) {
-			System.out.println("InvalidAlgorithmParameterException, encryption failed.");
+			System.out.println("InvalidAlgorithmParameterException, RSA encryption failed.");
 		}
     	catch (IllegalBlockSizeException e) {
-			System.out.println("IllegalBlockSizeException, encryption failed.");
+			System.out.println("IllegalBlockSizeException, RSA encryption failed.");
 		}
     	catch (BadPaddingException e) {
-			System.out.println("BadPaddingException, encryption failed.");
+			System.out.println("BadPaddingException, RSA encryption failed.");
 		}
         
         return new String(plainText, StandardCharsets.UTF_8);

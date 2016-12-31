@@ -7,6 +7,8 @@ import java.net.Socket;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
@@ -15,11 +17,12 @@ import java.util.Base64;
 import java.util.Calendar;
 import java.util.HashSet;
 
+import javax.crypto.KeyGenerator;
+
 public class Server {
 
     private static int portNum = 5000;
 	private static RSAPublicKey serverPubKey;
-	@SuppressWarnings("unused")
 	private static RSAPrivateKey serverPrivKey;
     private static HashSet<String> names = new HashSet<String>();
     private static HashSet<PrintWriter> writers = new HashSet<PrintWriter>();
@@ -35,6 +38,8 @@ public class Server {
     	}
     	
         System.out.println("The chat server is running on port: " + portNum);
+        
+        //setup server RSA keys
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
         keyGen.initialize(2048);
         KeyPair keyPair = keyGen.generateKeyPair();
@@ -46,7 +51,8 @@ public class Server {
             while (true) {
                 new Handler(listener.accept()).start();
             }
-        } finally {
+        }
+        finally {
             listener.close();
         }
     }
@@ -57,6 +63,8 @@ public class Server {
         private BufferedReader in;
         private PrintWriter out;
         private RSAPublicKey userPubKey;
+        private byte[] serverAesKey;
+        private byte[] userAesKey;
         private String timeStamp = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime());
 
         public Handler(Socket socket) {
@@ -65,7 +73,6 @@ public class Server {
 
         public void run() {
             try {
-
                 // Create character streams for the socket.
                 in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 out = new PrintWriter(socket.getOutputStream(), true);
@@ -81,8 +88,33 @@ public class Server {
 			    catch (Exception e) {
 					e.printStackTrace();
 				}
-                
-                out.println(RSA.encrypt(userPubKey, "a."));
+			    
+			    //generate AES key and IV
+				try {
+					KeyGenerator keygen;
+					keygen = KeyGenerator.getInstance("AES");
+					keygen.init(128);
+					serverAesKey = keygen.generateKey().getEncoded();
+				} catch (NoSuchAlgorithmException e) {
+					e.printStackTrace();
+				}
+			    
+			    SecureRandom random = new SecureRandom();
+			    byte seed[] = random.generateSeed(20);
+				random.setSeed(seed);
+				byte iv[] = new byte[16];
+				random.nextBytes(iv);
+				
+                //send and receive AES keys
+                out.println(RSA.encrypt(userPubKey, Base64.getEncoder().encodeToString(serverAesKey)));
+                userAesKey = Base64.getDecoder().decode(RSA.decrypt(serverPrivKey, in.readLine()));
+                /*
+                System.out.println("Server: " + Base64.getEncoder().encodeToString(serverAesKey));
+                System.out.println("Client: " + Base64.getEncoder().encodeToString(userAesKey));
+                out.println(Base64.getEncoder().encodeToString(iv) + AES.encrypt(serverAesKey, iv, "This is a test message to the Client encrypted in AES."));
+                String encString = in.readLine();
+			    System.out.println(AES.decrypt(userAesKey, Base64.getDecoder().decode(encString.substring(0, 24)), encString.substring(24)));
+                */
                 
                 //get user info and add them to list
                 out.println("REQUESTNAME");

@@ -8,6 +8,8 @@ import java.net.URL;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
@@ -15,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.ResourceBundle;
 import java.util.Scanner;
+
+import javax.crypto.KeyGenerator;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -41,9 +45,10 @@ public class ChatController {
 	
 	private RSAPublicKey userPubKey;
 	private RSAPrivateKey userPrivKey;
-	
-	@SuppressWarnings("unused")
 	private RSAPublicKey serverPubKey;
+	
+	private byte[] serverAesKey;
+	private byte[] userAesKey;
 
     @FXML
     private ResourceBundle resources;
@@ -105,7 +110,32 @@ public class ChatController {
 			    serverPubKey = (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(serverPubKeyBytes));
 			    out.println(Base64.getEncoder().encodeToString(userPubKey.getEncoded()));
 			    
-			    System.out.println(RSA.decrypt(userPrivKey, in.readLine()));
+			  //generate AES key and IV
+				try {
+					KeyGenerator keygen;
+					keygen = KeyGenerator.getInstance("AES");
+					keygen.init(128);
+					userAesKey = keygen.generateKey().getEncoded();
+				} catch (NoSuchAlgorithmException e) {
+					e.printStackTrace();
+				}
+			    
+			    SecureRandom random = new SecureRandom();
+			    byte seed[] = random.generateSeed(20);
+				random.setSeed(seed);
+				byte iv[] = new byte[16];
+				random.nextBytes(iv);
+				
+				//send and receive AES keys
+			    serverAesKey = Base64.getDecoder().decode(RSA.decrypt(userPrivKey, in.readLine()));
+			    out.println(RSA.encrypt(serverPubKey, Base64.getEncoder().encodeToString(userAesKey)));
+			    /*
+			    System.out.println("Server: " + Base64.getEncoder().encodeToString(serverAesKey));
+			    System.out.println("Client: " + Base64.getEncoder().encodeToString(userAesKey));
+			    String encString = in.readLine();
+			    System.out.println(AES.decrypt(serverAesKey, Base64.getDecoder().decode(encString.substring(0, 24)), encString.substring(24)));
+			    out.println(Base64.getEncoder().encodeToString(iv) + AES.encrypt(userAesKey, iv, "This is a test message to the server encrypted in AES."));
+			    */
 			    
 			    // Process all messages from server, according to the protocol.
 			        while (true) {
