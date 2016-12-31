@@ -10,7 +10,9 @@ import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
+import java.util.Calendar;
 import java.util.HashSet;
 
 public class Server {
@@ -55,6 +57,7 @@ public class Server {
         private BufferedReader in;
         private PrintWriter out;
         private RSAPublicKey userPubKey;
+        private String timeStamp = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime());
 
         public Handler(Socket socket) {
             this.socket = socket;
@@ -102,9 +105,9 @@ public class Server {
                 //add new user to list of current users
                 writers.add(out);
                 
-
-                // Accept messages from this client and broadcast them.
-                // Ignore other clients that cannot be broadcasted to.
+                System.out.println(name.split(" ")[0] + " connected at - "+ timeStamp);
+                
+                // Accept messages from this client and broadcast them. Ignore other clients that cannot be broadcasted to.
                 while (true) {
                     String input = in.readLine();
                     if (input == null) {
@@ -119,10 +122,9 @@ public class Server {
             		writer.println("DISCONNECTED-MESSAGE " + name + " " + "has disconnected form the server.");
                     writer.println("REMOVEUSER " + name);
                 }
-                System.out.println(e);
+            	System.out.println(name.split(" ")[0] + " disconnected at - "+ timeStamp);
             } finally {
-                // This client is going down!  Remove its name and its print
-                // writer from the sets, and close its socket.
+                // This client is going down! Remove its name and its print writer from the sets, and close its socket.
                 if (name != null) {
                     names.remove(name);
                 }
@@ -132,6 +134,7 @@ public class Server {
                 try {
                     socket.close();
                 } catch (IOException e) {
+                	//catch nothing!!!!!
                 }
             }
         }
