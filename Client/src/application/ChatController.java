@@ -129,6 +129,7 @@ public class ChatController {
 				//send and receive AES keys
 			    serverAesKey = Base64.getDecoder().decode(RSA.decrypt(userPrivKey, in.readLine()));
 			    out.println(RSA.encrypt(serverPubKey, Base64.getEncoder().encodeToString(userAesKey)));
+			    
 			    /*
 			    System.out.println("Server: " + Base64.getEncoder().encodeToString(serverAesKey));
 			    System.out.println("Client: " + Base64.getEncoder().encodeToString(userAesKey));

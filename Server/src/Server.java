@@ -108,6 +108,7 @@ public class Server {
                 //send and receive AES keys
                 out.println(RSA.encrypt(userPubKey, Base64.getEncoder().encodeToString(serverAesKey)));
                 userAesKey = Base64.getDecoder().decode(RSA.decrypt(serverPrivKey, in.readLine()));
+                
                 /*
                 System.out.println("Server: " + Base64.getEncoder().encodeToString(serverAesKey));
                 System.out.println("Client: " + Base64.getEncoder().encodeToString(userAesKey));

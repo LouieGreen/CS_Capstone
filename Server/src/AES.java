@@ -52,34 +52,4 @@ public class AES {
     	
         return new String(original);
     }
-/*
-    public static void main(String[] args) throws UnsupportedEncodingException, NoSuchAlgorithmException, NoSuchPaddingException, 
-    												InvalidKeyException, InvalidAlgorithmParameterException {
-    	// generate random key value
-    	KeyGenerator keygen = KeyGenerator.getInstance("AES");
-		keygen.init(128);
-		byte[] key = keygen.generateKey().getEncoded();
-		
-		// generate random initialization vector
-		SecureRandom random = new SecureRandom();
-		byte iv[] = new byte[16];
-		byte seed[] = random.generateSeed(20);
-		random.setSeed(seed);
-		
-        String message = "This is a text message for testing.";
-        
-        for(int i=0; i<50; i++) {
-        	random.nextBytes(iv);
-        	
-	        String encryptedMessage = encrypt(key, iv, message);
-	        String decryptedMessage = decrypt(key, iv, encryptedMessage);
-	        
-	        System.out.println(encryptedMessage);
-	        System.out.println(decryptedMessage);
-	        String a = Base64.getEncoder().encodeToString(iv) + encryptedMessage;
-	        System.out.println(a);
-	        System.out.println(decrypt(key, Base64.getDecoder().decode(a.substring(0, 24)), encryptedMessage));
-	        System.out.println("");
-        }
-    } */
 }
