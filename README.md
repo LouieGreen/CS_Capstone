@@ -10,7 +10,6 @@ Some features the old project was missing were:
 
 These were some of the features that I was hoping to add and bring into the new, improved project.
 
-------
 ## Setup and use
 **Java 8 must be installed on both the client and the server.**
 
