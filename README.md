@@ -1,5 +1,4 @@
 # CS_Capstone
-----------------------------
 This is a simple chat room type program developed and coded as an improved and expanded version of a previous team project, which can be found [here](https://github.com/canevaa/CapstoneProject), I was part of working on. This old project was more of a proof of concept than anything else and provided a good base moving forwards.
 
 Some features the old project was missing were:
