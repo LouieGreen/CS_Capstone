@@ -11,6 +11,10 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-# my settings file and useless bin folder
+# my custom ignores to make github clean
 savedSettings.txt
 Client/bin/*
+build.fxbuild
+.project
+.classpath
+org.eclipse.jdt.core.prefs
