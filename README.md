@@ -11,7 +11,7 @@ Some features the old project was missing were:
 These were some of the features that I was hoping to add and bring into the new, improved project.
 
 ------
-#### Setup and use
+## Setup and use
 **Java 8 must be installed on both the client and the server.**
 
 To use this project there needs to be a server setup and running, this server either needs to be on your local network or be addressable via IP address and have the desired port port-forwarded to the server.
