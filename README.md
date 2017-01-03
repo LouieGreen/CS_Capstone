@@ -1,14 +1,15 @@
 # CS_Capstone
 This is a simple chat room type program developed and coded as an improved and expanded version of a previous team project, which can be found [here](https://github.com/canevaa/CapstoneProject), I was part of working on. This old project was more of a proof of concept than anything else and provided a good base moving forwards.
 
-Some features the old project was missing were:
+These were some of the features that I was hoping to add and bring into the new, improved project.:
 * A nice user interface
 * Simplifed setup and use
 * Portability
 * Multiple user interaction
 * Multiple user connections to the server
 
-These were some of the features that I was hoping to add and bring into the new, improved project.
+#### The goal of this project
+This project is meant to be coded completely in Java and not to use any outside libraries, this is so that all work done is my own and the project requires no extra setup or maintenance.
 
 ## Setup and use
 **Java 8 must be installed on both the client and the server.**
