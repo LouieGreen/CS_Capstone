@@ -68,13 +68,6 @@ public class ChatController {
     
     @FXML
     void initialize() {
-        assert root != null : "fx:id=\"root\" was not injected: check your FXML file 'chat.fxml'.";
-        assert grid != null : "fx:id=\"grid\" was not injected: check your FXML file 'chat.fxml'.";
-        assert chatScroll != null : "fx:id=\"chatScroll\" was not injected: check your FXML file 'chat.fxml'.";
-        assert chatFlow != null : "fx:id=\"chatFlow\" was not injected: check your FXML file 'chat.fxml'.";
-        assert namesScroll != null : "fx:id=\"namesScroll\" was not injected: check your FXML file 'chat.fxml'.";
-        assert namesFlow != null : "fx:id=\"namesFlow\" was not injected: check your FXML file 'chat.fxml'.";
-        assert input != null : "fx:id=\"input\" was not injected: check your FXML file 'chat.fxml'.";
         
         Task<Void> task = new Task<Void>() {
 			@Override

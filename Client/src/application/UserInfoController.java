@@ -27,6 +27,8 @@ import javafx.stage.Stage;
 public class UserInfoController {
 	
 	private static User user = new User();
+	//sadly this needs to be here, at least in my implementation due to scope issues
+	private Path pathToSettingsFile = null;
 
     @FXML
     private ResourceBundle resources;
@@ -77,88 +79,41 @@ public class UserInfoController {
 
     @FXML
     void initialize() {
-        assert root != null : "fx:id=\"root\" was not injected: check your FXML file 'userInfo.fxml'.";
-        assert grid != null : "fx:id=\"grid\" was not injected: check your FXML file 'userInfo.fxml'.";
-        assert serverLabel != null : "fx:id=\"serverLabel\" was not injected: check your FXML file 'userInfo.fxml'.";
-        assert usernameLabel != null : "fx:id=\"usernameLabel\" was not injected: check your FXML file 'userInfo.fxml'.";
-        assert portLabel != null : "fx:id=\"portLabel\" was not injected: check your FXML file 'userInfo.fxml'.";
-        assert serverText != null : "fx:id=\"serverText\" was not injected: check your FXML file 'userInfo.fxml'.";
-        assert userText != null : "fx:id=\"userText\" was not injected: check your FXML file 'userInfo.fxml'.";
-        assert portText != null : "fx:id=\"portText\" was not injected: check your FXML file 'userInfo.fxml'.";
-        assert colorLabel != null : "fx:id=\"colorLabel\" was not injected: check your FXML file 'userInfo.fxml'.";
-        assert blackButton != null : "fx:id=\"blackButton\" was not injected: check your FXML file 'userInfo.fxml'.";
-        assert color != null : "fx:id=\"color\" was not injected: check your FXML file 'userInfo.fxml'.";
-        assert blueButton != null : "fx:id=\"blueButton\" was not injected: check your FXML file 'userInfo.fxml'.";
-        assert greenButton != null : "fx:id=\"greenButton\" was not injected: check your FXML file 'userInfo.fxml'.";
-        assert purpleButton != null : "fx:id=\"purpleButton\" was not injected: check your FXML file 'userInfo.fxml'.";
-        assert redButton != null : "fx:id=\"redButton\" was not injected: check your FXML file 'userInfo.fxml'.";
-        assert saveLabel != null : "fx:id=\"saveLabel\" was not injected: check your FXML file 'userInfo.fxml'.";
-        assert saveButton != null : "fx:id=\"saveButton\" was not injected: check your FXML file 'userInfo.fxml'.";
-        assert save != null : "fx:id=\"save\" was not injected: check your FXML file 'userInfo.fxml'.";
-        assert deletButton != null : "fx:id=\"deletButton\" was not injected: check your FXML file 'userInfo.fxml'.";
-        assert submit != null : "fx:id=\"submit\" was not injected: check your FXML file 'userInfo.fxml'.";
-        assert notFinished != null : "fx:id=\"notFinished\" was not injected: check your FXML file 'userInfo.fxml'.";
 
     	File settingsFile = new File(".savedSettings.txt");
-    	boolean settingsFileExists = false;
-    		
+    	
     	try {
     		String colorFromFile = null;
     		Scanner input = null;
     			
     		//check if files exists
     		if(settingsFile.exists()){
-    			settingsFileExists = true;
+    			pathToSettingsFile = FileSystems.getDefault().getPath(".savedSettings.txt");
+    			
     			input = new Scanner(settingsFile);
-    		}
-    			
-    		if(settingsFileExists){
     			serverText.setText(input.nextLine());
-    		}
-    		
-    		if(settingsFileExists){
     			userText.setText(input.nextLine());
-    		}
-    		
-    		if(settingsFileExists){
     			portText.setText(input.nextLine());
-    		}
-    		
-    		if(settingsFileExists){
     			colorFromFile = input.nextLine();
-    		}
-    		
-    		if(settingsFileExists && colorFromFile.equals("Black")){
-    			blackButton.setSelected(true);
-    		}
-    		else if(settingsFileExists && colorFromFile.equals("Blue")){
-    			blueButton.setSelected(true);
-    		}
-    		else if(settingsFileExists && colorFromFile.equals("Green")){
-    			greenButton.setSelected(true);
-    		}
-    		else if(settingsFileExists && colorFromFile.equals("Purple")){
-    			purpleButton.setSelected(true);
-    		}
-    		else if(settingsFileExists && colorFromFile.equals("Red")){
-    			redButton.setSelected(true);
-    		}
     			
+    			if(colorFromFile.equals("Black")){ blackButton.setSelected(true); }
+        		else if(colorFromFile.equals("Blue")){ blueButton.setSelected(true); }
+        		else if(colorFromFile.equals("Green")){ greenButton.setSelected(true); }
+        		else if(colorFromFile.equals("Purple")){ purpleButton.setSelected(true); }
+        		else if(colorFromFile.equals("Red")){ redButton.setSelected(true); }
+    			
+    			if(input.nextLine().equals("true")){
+        			saveButton.setSelected(true);
+        		}
+    			input.close();
+    		}
+  			
     		blackButton.setUserData("Black");
     		blueButton.setUserData("Blue");
     		greenButton.setUserData("Green");
     		purpleButton.setUserData("Purple");
     		redButton.setUserData("Red");
-    			
-
-    		if(settingsFileExists && input.nextLine().equals("true")){
-    			saveButton.setSelected(true);
-    		}
-    			
-    		if(settingsFileExists){
-    			input.close();
-    		}
-    			
+ 			
     		submit.setOnAction(e -> {
     			//check server field is filled in --     check username is filled in and that the field isn't just spaces --         check the port field is filled   -- check color is selected
     			if(serverText.getText().length() != 0 && userText.getText().length() != 0 && !userText.getText().trim().isEmpty() && portText.getText().length() != 0 && color.getSelectedToggle() != null) {
@@ -172,10 +127,12 @@ public class UserInfoController {
     				//save settings to file
     				if(saveButton.isSelected()) {
     					try {
+    						if(pathToSettingsFile != null) {
+    							Files.setAttribute(pathToSettingsFile, "dos:hidden", false);
+    						}
     						PrintWriter p = new PrintWriter(settingsFile);
     						p.println(user.getServer() + "\n" + user.getName() + "\n" + user.getPort() + "\n"  + user.getColor() + "\n" + saveButton.isSelected());
     						p.close();
-    						Path pathToSettingsFile = FileSystems.getDefault().getPath(".savedSettings.txt");
     						Files.setAttribute(pathToSettingsFile, "dos:hidden", true);
     					}
     					catch (FileNotFoundException e1) {
