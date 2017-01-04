@@ -28,7 +28,6 @@ public class UserInfoController {
 	
 	private static User user = new User();
 	//sadly this path object needs to be here, at least in my implementation due to scope issues
-	private Path pathToSettingsFile = null;
 
     @FXML private ResourceBundle resources;
     @FXML private URL location;
@@ -57,6 +56,7 @@ public class UserInfoController {
     @FXML
     void initialize() {
     	File settingsFile = new File(".savedSettings.txt");
+    	Path pathToSettingsFile = FileSystems.getDefault().getPath(".savedSettings.txt");
     	
     	try {
     		String colorFromFile = null;
@@ -64,8 +64,6 @@ public class UserInfoController {
     			
     		//check if files exists
     		if(settingsFile.exists()){
-    			pathToSettingsFile = FileSystems.getDefault().getPath(".savedSettings.txt");
-    			
     			input = new Scanner(settingsFile);
     			serverText.setText(input.nextLine());
     			userText.setText(input.nextLine());
@@ -103,7 +101,7 @@ public class UserInfoController {
     				//save settings to file
     				if(saveButton.isSelected()) {
     					try {
-    						if(pathToSettingsFile != null) {
+    						if(settingsFile.exists()) {
     							Files.setAttribute(pathToSettingsFile, "dos:hidden", false);
     						}
     						PrintWriter p = new PrintWriter(settingsFile);
