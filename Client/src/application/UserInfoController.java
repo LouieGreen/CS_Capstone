@@ -27,59 +27,35 @@ import javafx.stage.Stage;
 public class UserInfoController {
 	
 	private static User user = new User();
-	//sadly this needs to be here, at least in my implementation due to scope issues
+	//sadly this path object needs to be here, at least in my implementation due to scope issues
 	private Path pathToSettingsFile = null;
 
-    @FXML
-    private ResourceBundle resources;
-    @FXML
-    private URL location;
-    @FXML
-    private AnchorPane root;
-    @FXML
-    private GridPane grid;
-    @FXML
-    private Label serverLabel;
-    @FXML
-    private Label usernameLabel;
-    @FXML
-    private Label portLabel;
-    @FXML
-    private TextField serverText;
-    @FXML
-    private TextField userText;
-    @FXML
-    private TextField portText;
-    @FXML
-    private Label colorLabel;
-    @FXML
-    private RadioButton blackButton;
-    @FXML
-    private ToggleGroup color;
-    @FXML
-    private RadioButton blueButton;
-    @FXML
-    private RadioButton greenButton;
-    @FXML
-    private RadioButton purpleButton;
-    @FXML
-    private RadioButton redButton;
-    @FXML
-    private Label saveLabel;
-    @FXML
-    private RadioButton saveButton;
-    @FXML
-    private ToggleGroup save;
-    @FXML
-    private RadioButton deletButton;
-    @FXML
-    private Button submit;
-    @FXML
-    private Label notFinished;
+    @FXML private ResourceBundle resources;
+    @FXML private URL location;
+    @FXML private AnchorPane root;
+    @FXML private GridPane grid;
+    @FXML private Label serverLabel;
+    @FXML private Label usernameLabel;
+    @FXML private Label portLabel;
+    @FXML private TextField serverText;
+    @FXML private TextField userText;
+    @FXML private TextField portText;
+    @FXML private Label colorLabel;
+    @FXML private RadioButton blackButton;
+    @FXML private ToggleGroup color;
+    @FXML private RadioButton blueButton;
+    @FXML private RadioButton greenButton;
+    @FXML private RadioButton purpleButton;
+    @FXML private RadioButton redButton;
+    @FXML private Label saveLabel;
+    @FXML private RadioButton saveButton;
+    @FXML private ToggleGroup save;
+    @FXML private RadioButton deletButton;
+    @FXML private Button submit;
+    @FXML private Label notFinished;
 
     @FXML
     void initialize() {
-
     	File settingsFile = new File(".savedSettings.txt");
     	
     	try {

@@ -46,27 +46,19 @@ public class ChatController {
 	@SuppressWarnings("unused")
 	private byte[] serverAesKey;
 	private byte[] userAesKey;
-
-    @FXML
-    private ResourceBundle resources;
-    @FXML
-    private URL location;
-    @FXML
-    private AnchorPane root;
-    @FXML
-    private GridPane grid;
-    @FXML
-    private ScrollPane chatScroll;
-    @FXML
-    protected TextFlow chatFlow;
-    @FXML
-    private ScrollPane namesScroll;
-    @FXML
-    protected TextFlow namesFlow;
-    @FXML
-    protected TextArea input;
+	
+	///// @FXML Objects /////
+    @FXML private ResourceBundle resources;
+    @FXML private URL location;
+    @FXML private AnchorPane root;
+    @FXML private GridPane grid;
+    @FXML private ScrollPane namesScroll;
+    @FXML private ScrollPane chatScroll;
+    @FXML protected TextFlow chatFlow;
+    @FXML protected TextFlow namesFlow;
+    @FXML protected TextArea input;
     
-    @FXML
+    @FXML 
     void initialize() {
         
         Task<Void> task = new Task<Void>() {
