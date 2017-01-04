@@ -5,6 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ResourceBundle;
 import java.util.Scanner;
 
@@ -96,8 +99,7 @@ public class UserInfoController {
         assert submit != null : "fx:id=\"submit\" was not injected: check your FXML file 'userInfo.fxml'.";
         assert notFinished != null : "fx:id=\"notFinished\" was not injected: check your FXML file 'userInfo.fxml'.";
 
-    	
-    	File settingsFile = new File("savedSettings.txt");
+    	File settingsFile = new File(".savedSettings.txt");
     	boolean settingsFileExists = false;
     		
     	try {
@@ -173,10 +175,14 @@ public class UserInfoController {
     						PrintWriter p = new PrintWriter(settingsFile);
     						p.println(user.getServer() + "\n" + user.getName() + "\n" + user.getPort() + "\n"  + user.getColor() + "\n" + saveButton.isSelected());
     						p.close();
+    						Path pathToSettingsFile = FileSystems.getDefault().getPath(".savedSettings.txt");
+    						Files.setAttribute(pathToSettingsFile, "dos:hidden", true);
     					}
     					catch (FileNotFoundException e1) {
     						e1.printStackTrace();
-    					}
+    					} catch (IOException e1) {
+							e1.printStackTrace();
+						}
     				}
     				else if(deletButton.isSelected()){
     					if(settingsFile.exists()){

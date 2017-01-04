@@ -12,7 +12,7 @@
 hs_err_pid*
 
 # my custom ignores to make github clean
-savedSettings.txt
+.savedSettings.txt
 Client/bin/*
 build.fxbuild
 .project
