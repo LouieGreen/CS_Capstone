@@ -7,8 +7,6 @@ import java.net.Socket;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
@@ -16,8 +14,6 @@ import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.HashSet;
-
-import javax.crypto.KeyGenerator;
 
 public class Server {
 
@@ -64,7 +60,8 @@ public class Server {
         private PrintWriter out;
         private RSAPublicKey userPubKey;
         private byte[] serverAesKey;
-        private byte[] userAesKey;
+        @SuppressWarnings("unused")
+		private byte[] userAesKey;
         private String timeStamp = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime());
 
         public Handler(Socket socket) {
@@ -85,25 +82,11 @@ public class Server {
 			    try {
 					userPubKey = (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(userPubKeyBytes));
 				} 
-			    catch (Exception e) {
-					e.printStackTrace();
-				}
+			    catch (Exception e) { e.printStackTrace(); }
 			    
 			    //generate AES key and IV
-				try {
-					KeyGenerator keygen;
-					keygen = KeyGenerator.getInstance("AES");
-					keygen.init(128);
-					serverAesKey = keygen.generateKey().getEncoded();
-				} catch (NoSuchAlgorithmException e) {
-					e.printStackTrace();
-				}
-			    
-			    SecureRandom random = new SecureRandom();
-			    byte seed[] = random.generateSeed(20);
-				random.setSeed(seed);
-				byte iv[] = new byte[16];
-				random.nextBytes(iv);
+				serverAesKey = AES.generateKey();
+				byte[] iv = AES.generateInitVector();
 				
                 //send and receive AES keys
                 out.println(RSA.encrypt(userPubKey, Base64.getEncoder().encodeToString(serverAesKey)));
@@ -112,6 +95,7 @@ public class Server {
                 /*
                 System.out.println("Server: " + Base64.getEncoder().encodeToString(serverAesKey));
                 System.out.println("Client: " + Base64.getEncoder().encodeToString(userAesKey));
+                System.out.println("Enc message: " + AES.encrypt(serverAesKey, iv, "This is a test message to the Client encrypted in AES."));
                 out.println(Base64.getEncoder().encodeToString(iv) + AES.encrypt(serverAesKey, iv, "This is a test message to the Client encrypted in AES."));
                 String encString = in.readLine();
 			    System.out.println(AES.decrypt(userAesKey, Base64.getDecoder().decode(encString.substring(0, 24)), encString.substring(24)));
@@ -150,7 +134,9 @@ public class Server {
                         writer.println("MESSAGE " + name + " " + input);
                     }
                 }
-            } catch (IOException e) {
+            }
+            
+            catch (IOException e) {
             	for (PrintWriter writer : writers) {
             		writer.println("DISCONNECTED-MESSAGE " + name + " " + "has disconnected form the server.");
                     writer.println("REMOVEUSER " + name);

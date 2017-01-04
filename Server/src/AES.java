@@ -1,11 +1,13 @@
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Base64;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -51,5 +53,31 @@ public class AES {
     	catch(BadPaddingException e) {System.out.println("BadPaddingException, AES encryption failed.");}
     	
         return new String(original);
+    }
+    
+    public static byte[] generateKey() {
+    	byte[] key = null;
+    	
+    	try {
+			KeyGenerator keygen;
+			keygen = KeyGenerator.getInstance("AES");
+			keygen.init(128);
+			key = keygen.generateKey().getEncoded();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+    	
+    	return key;
+    }
+    
+    public static byte[] generateInitVector() {
+    	
+    	SecureRandom random = new SecureRandom();
+	    byte seed[] = random.generateSeed(20);
+		random.setSeed(seed);
+		byte iv[] = new byte[16];
+		random.nextBytes(iv);
+		
+		return iv;
     }
 }
