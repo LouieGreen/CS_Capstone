@@ -10,7 +10,6 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
-
 public class Main extends Application {
 	
 	@Override

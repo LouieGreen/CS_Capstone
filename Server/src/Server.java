@@ -67,7 +67,8 @@ public class Server {
     }
 
     private static class Handler extends Thread {
-        private String name;
+    	private boolean isFailedConnection;
+        private String username;
         private Socket socket;
         private BufferedReader in;
         private PrintWriter out;
@@ -98,53 +99,64 @@ public class Server {
 
                 //get user info and add them to list
                 sendMessage(out, "REQUESTNAME");
-                name = AES.decrypt(userAesKey, in.readLine());
-                names.add(name);
+                username = AES.decrypt(userAesKey, in.readLine());
                 
-                sendMessage(out, "CONNECTED");
-                
-                //sends all connected usernames to new user
-                for(String n: names) {
-                	sendMessage(out, "NEWUSER " + n);
+                for(String existingUser: names) {
+                	if(existingUser.split(" ")[0].equals(username.split(" ")[0])) {
+                		sendMessage(out, "DUPLICATE-USERNAME");
+                		isFailedConnection = true;
+                	}
                 }
                 
-                //send new username to all other users
-                for(PrintWriter w: writers) {
-                	sendMessage(w, "NEWUSER " + name);
-                	sendMessage(w, "USER-UPDATE-MESSAGE " + name + " " + "has connected to the server.");
-                }
-                
-                //add new user to list of current users
-                writers.add(out);
-                
-                System.out.println(name.split(" ")[0] + " connected at - " + timeStamp);
-                
-                // Accept messages from this client and broadcast them. Ignore other clients that cannot be broadcasted to.
-                while (true) {
-                    String input = AES.decrypt(userAesKey, in.readLine());
-                    if (input == null) {
-                        return;
-                    }
-                    for (PrintWriter writer : writers) {
-                    	sendMessage(writer, "MESSAGE " + name + " " + input);
-                    }
+                if(!isFailedConnection) {
+	                names.add(username);
+	                
+	                sendMessage(out, "CONNECTED");
+	                
+	                //sends all connected usernames to new user
+	                for(String n: names) {
+	                	sendMessage(out, "NEWUSER " + n);
+	                }
+	                
+	                //send new username to all other users
+	                for(PrintWriter w: writers) {
+	                	sendMessage(w, "NEWUSER " + username);
+	                	sendMessage(w, "USER-UPDATE-MESSAGE " + username + " " + "has connected to the server.");
+	                }
+	                
+	                //add new user to list of current users
+	                writers.add(out);
+	                
+	                System.out.println(username.split(" ")[0] + " connected at - " + timeStamp);
+	                
+	                // Accept messages from this client and broadcast them. Ignore other clients that cannot be broadcasted to.
+	                while (true) {
+	                    String input = AES.decrypt(userAesKey, in.readLine());
+	                    if (input == null) {
+	                        return;
+	                    }
+	                    for (PrintWriter writer : writers) {
+	                    	sendMessage(writer, "MESSAGE " + username + " " + input);
+	                    }
+	                }
                 }
             }
             
             catch (IOException | InvalidKeySpecException | NoSuchAlgorithmException e) {
-            	for (PrintWriter writer : writers) {
-            		writer.println(AES.encrypt(serverAesKey, AES.getInitVector(random), ("DISCONNECTED-MESSAGE " + name + " " + "has disconnected from the server.")));
-            		writer.println(AES.encrypt(serverAesKey, AES.getInitVector(random), ("REMOVEUSER " + name)));
-                }
-            	System.out.println(name.split(" ")[0] + " disconnected at - "+ timeStamp);
+            	if(!isFailedConnection) {
+	            	for (PrintWriter writer : writers) {
+	            		sendMessage(writer, "DISCONNECTED-MESSAGE " + username + " " + "has disconnected from the server.");
+	            		sendMessage(writer, "REMOVEUSER " + username);
+	                }
+	            	System.out.println(username.split(" ")[0] + " disconnected at - "+ timeStamp);
+            	}
             }
-            
             finally {
                 // This client is going down! Remove its name and its print writer from the sets, and close its socket.
-                if (name != null) {
-                    names.remove(name);
+                if (username != null && !isFailedConnection) {
+                    names.remove(username);
                 }
-                if (out != null) {
+                if (out != null && !isFailedConnection) {
                     writers.remove(out);
                 }
                 try {

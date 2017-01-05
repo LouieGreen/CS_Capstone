@@ -116,7 +116,7 @@
                   <Font size="14.0" />
                </font>
             </Button>
-            <Label fx:id="notFinished" opacity="0.0" prefHeight="122.0" prefWidth="195.0" text="Please fill out fields." textAlignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="10">
+            <Label fx:id="notFinished" prefHeight="122.0" prefWidth="195.0" textAlignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="10">
                <font>
                   <Font size="14.0" />
                </font>

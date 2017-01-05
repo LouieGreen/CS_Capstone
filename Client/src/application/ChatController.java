@@ -20,6 +20,8 @@ import java.util.Scanner;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
@@ -27,8 +29,10 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.stage.Stage;
 
 public class ChatController {
 	
@@ -55,9 +59,9 @@ public class ChatController {
     @FXML private GridPane grid;
     @FXML private ScrollPane namesScroll;
     @FXML private ScrollPane chatScroll;
-    @FXML protected TextFlow chatFlow;
-    @FXML protected TextFlow namesFlow;
-    @FXML protected TextArea input;
+    @FXML private TextFlow chatFlow;
+    @FXML private TextFlow namesFlow;
+    @FXML private TextArea input;
     
     @FXML 
     void initialize() {
@@ -138,6 +142,23 @@ public class ChatController {
 				            	colorList.remove(i);
 				            	
 				            	Platform.runLater (() -> updateUserList());
+				            }
+				            else if(line.startsWith("DUPLICATE-USERNAME")) {
+				            	Platform.runLater (() -> {
+				            		try {
+						            	Stage stage = (Stage) root.getScene().getWindow();
+					    				stage.close();
+					    				UserInfoController.setTextForLabel();
+					    				URL fxmlUrlInfo = this.getClass().getClassLoader().getResource("resources/userInfo.fxml");
+					    				Pane info = FXMLLoader.<Pane> load(fxmlUrlInfo);
+										stage.setScene(new Scene(info));
+										stage.setTitle("Chat Client: Duplicate name, enter antoher.");
+										stage.show();
+				            		}
+				            		catch(Exception e) {
+				            			e.printStackTrace();
+				            		}
+				            	});
 				            }
 				            scanner.close();
 				        } //end if statement

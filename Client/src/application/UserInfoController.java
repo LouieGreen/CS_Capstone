@@ -52,6 +52,7 @@ public class UserInfoController {
     @FXML private RadioButton deletButton;
     @FXML private Button submit;
     @FXML private Label notFinished;
+    	  private static boolean failedConnection = false;
 
     @FXML
     void initialize() {
@@ -137,13 +138,28 @@ public class UserInfoController {
     				notFinished.setOpacity(1);
     			}
     		});
+    		
+    		if(failedConnection) {
+    			System.out.println("HElllo");
+    			notFinished.setOpacity(1);
+    	    	notFinished.setText("Duplicate name, enter another.");
+    	    	userText.clear();
+        	}
+        	else {
+        		notFinished.setOpacity(0);
+        		notFinished.setText("Please fill out fields.");
+        	}
     	} 
     	catch (Exception e) {
     		e.printStackTrace();
     	}
     }
     
-    public static User getUser() {
+    protected static void setTextForLabel() {
+    	failedConnection = true; 
+	}
+
+	protected static User getUser() {
     	return user;
     }
         
