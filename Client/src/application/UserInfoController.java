@@ -27,8 +27,8 @@ import javafx.stage.Stage;
 public class UserInfoController {
 	
 	private static User user = new User();
-	//sadly this path object needs to be here, at least in my implementation due to scope issues
-
+	
+	///// @FXML Objects /////
     @FXML private ResourceBundle resources;
     @FXML private URL location;
     @FXML private AnchorPane root;
@@ -76,9 +76,7 @@ public class UserInfoController {
         		else if(colorFromFile.equals("Purple")){ purpleButton.setSelected(true); }
         		else if(colorFromFile.equals("Red")){ redButton.setSelected(true); }
     			
-    			if(input.nextLine().equals("true")){
-        			saveButton.setSelected(true);
-        		}
+       			saveButton.setSelected(true);
     			input.close();
     		}
   			
@@ -105,7 +103,7 @@ public class UserInfoController {
     							Files.setAttribute(pathToSettingsFile, "dos:hidden", false);
     						}
     						PrintWriter p = new PrintWriter(settingsFile);
-    						p.println(user.getServer() + "\n" + user.getName() + "\n" + user.getPort() + "\n"  + user.getColor() + "\n" + saveButton.isSelected());
+    						p.println(user.getServer() + "\n" + user.getName() + "\n" + user.getPort() + "\n"  + user.getColor());
     						p.close();
     						Files.setAttribute(pathToSettingsFile, "dos:hidden", true);
     					}

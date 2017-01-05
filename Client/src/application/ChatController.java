@@ -8,6 +8,7 @@ import java.net.URL;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.SecureRandom;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
@@ -43,9 +44,9 @@ public class ChatController {
 	private RSAPrivateKey userPrivKey;
 	private RSAPublicKey serverPubKey;
 	
-	@SuppressWarnings("unused")
 	private byte[] serverAesKey;
 	private byte[] userAesKey;
+	private SecureRandom random = new SecureRandom();
 	
 	///// @FXML Objects /////
     @FXML private ResourceBundle resources;
@@ -92,26 +93,20 @@ public class ChatController {
 			    serverPubKey = (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(serverPubKeyBytes));
 			    out.println(Base64.getEncoder().encodeToString(userPubKey.getEncoded()));
 			    
+			    //create SecureRandom object with random seed
+			    byte seed[] = random.generateSeed(20);
+				random.setSeed(seed);
+			    
 			    //generate AES key and IV
 				userAesKey = AES.generateKey();
-			    byte[] iv = AES.generateInitVector();
 				
 				//send and receive AES keys
 			    serverAesKey = Base64.getDecoder().decode(RSA.decrypt(userPrivKey, in.readLine()));
 			    out.println(RSA.encrypt(serverPubKey, Base64.getEncoder().encodeToString(userAesKey)));
-			    
-			    /*
-			    System.out.println("Server: " + Base64.getEncoder().encodeToString(serverAesKey));
-			    System.out.println("Client: " + Base64.getEncoder().encodeToString(userAesKey));
-			    String encString = in.readLine();
-			    System.out.println(AES.decrypt(serverAesKey, Base64.getDecoder().decode(encString.substring(0, 24)), encString.substring(24)));
-			    System.out.println("Enc message: " + Base64.getEncoder().encodeToString(iv) + AES.encrypt(userAesKey, iv, "This is a test message to the server encrypted in AES."));
-			    out.println(Base64.getEncoder().encodeToString(iv) + AES.encrypt(userAesKey, iv, "This is a test message to the server encrypted in AES."));
-			    */
-			    
+
 			    // Process all messages from server, according to the protocol.
 			        while (true) {
-			            String line = in.readLine();
+			            String line = AES.decrypt(serverAesKey, in.readLine());
 			            
 				        if(line != null) {
 				        	scanner = new Scanner(line);
@@ -123,7 +118,7 @@ public class ChatController {
 				                input.setEditable(true);
 				            }
 				            else if (line.startsWith("REQUESTNAME")) {
-				                out.println(user.getName() + " " + user.getColor());
+				            	sendMessage(out, user.getName() + " " + user.getColor());
 				            }
 				            else if(line.startsWith("NEWUSER")){
 				            	junk = scanner.next(); //eats NEWUSER
@@ -164,7 +159,7 @@ public class ChatController {
 			
 			if((e.getCode() == KeyCode.ENTER) && !kb.match(e)){
 				String userText = (input.getText());
-				out.println(userText);
+				sendMessage(out, userText);
 				input.clear();
 				e.consume();
 				chatScroll.setVvalue(1);
@@ -201,5 +196,9 @@ public class ChatController {
     		chatFlow.getChildren().add(t); //add to chat
     		chatScroll.setVvalue(1); //set scroll to bottom so it scrolls with text
     	});
+    }
+    
+    private void sendMessage(PrintWriter out, String message) {
+    	out.println(AES.encrypt(userAesKey, AES.getInitVector(random), message));
     }
 }

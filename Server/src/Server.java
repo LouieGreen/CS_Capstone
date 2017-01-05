@@ -7,8 +7,11 @@ import java.net.Socket;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
@@ -20,6 +23,8 @@ public class Server {
     private static int portNum = 5000;
 	private static RSAPublicKey serverPubKey;
 	private static RSAPrivateKey serverPrivKey;
+	private static byte[] serverAesKey;
+	private static SecureRandom random = new SecureRandom();;
     private static HashSet<String> names = new HashSet<String>();
     private static HashSet<PrintWriter> writers = new HashSet<PrintWriter>();
     
@@ -42,6 +47,14 @@ public class Server {
         serverPubKey = (RSAPublicKey) keyPair.getPublic();
         serverPrivKey = (RSAPrivateKey) keyPair.getPrivate();
         
+        //create SecureRandom object with random seed
+        SecureRandom random = new SecureRandom();
+	    byte seed[] = random.generateSeed(20);
+		random.setSeed(seed);
+        
+        //generate AES key and IV
+		serverAesKey = AES.generateKey();
+		
         ServerSocket listener = new ServerSocket(portNum);
         try {
             while (true) {
@@ -59,8 +72,6 @@ public class Server {
         private BufferedReader in;
         private PrintWriter out;
         private RSAPublicKey userPubKey;
-        private byte[] serverAesKey;
-        @SuppressWarnings("unused")
 		private byte[] userAesKey;
         private String timeStamp = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime());
 
@@ -79,70 +90,56 @@ public class Server {
                 
                 //get user public key
                 byte[] userPubKeyBytes = Base64.getDecoder().decode(in.readLine());
-			    try {
-					userPubKey = (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(userPubKeyBytes));
-				} 
-			    catch (Exception e) { e.printStackTrace(); }
+				userPubKey = (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(userPubKeyBytes));
 			    
-			    //generate AES key and IV
-				serverAesKey = AES.generateKey();
-				byte[] iv = AES.generateInitVector();
-				
                 //send and receive AES keys
                 out.println(RSA.encrypt(userPubKey, Base64.getEncoder().encodeToString(serverAesKey)));
                 userAesKey = Base64.getDecoder().decode(RSA.decrypt(serverPrivKey, in.readLine()));
-                
-                /*
-                System.out.println("Server: " + Base64.getEncoder().encodeToString(serverAesKey));
-                System.out.println("Client: " + Base64.getEncoder().encodeToString(userAesKey));
-                System.out.println("Enc message: " + AES.encrypt(serverAesKey, iv, "This is a test message to the Client encrypted in AES."));
-                out.println(Base64.getEncoder().encodeToString(iv) + AES.encrypt(serverAesKey, iv, "This is a test message to the Client encrypted in AES."));
-                String encString = in.readLine();
-			    System.out.println(AES.decrypt(userAesKey, Base64.getDecoder().decode(encString.substring(0, 24)), encString.substring(24)));
-                */
-                
-                //get user info and add them to list
-                out.println("REQUESTNAME");
-                name = in.readLine();
-                names.add(name);
 
-                out.println("CONNECTED");
+                //get user info and add them to list
+                sendMessage(out, "REQUESTNAME");
+                name = AES.decrypt(userAesKey, in.readLine());
+                names.add(name);
+                
+                sendMessage(out, "CONNECTED");
                 
                 //sends all connected usernames to new user
-                for(String n: names){
-                	out.println("NEWUSER " + n);
+                for(String n: names) {
+                	sendMessage(out, "NEWUSER " + n);
                 }
                 
                 //send new username to all other users
-                for(PrintWriter w: writers){
-                	w.println("NEWUSER " + name);
-                	w.println("USER-UPDATE-MESSAGE " + name + " " + "has connected to the server.");
+                for(PrintWriter w: writers) {
+                	sendMessage(w, "NEWUSER " + name);
+                	sendMessage(w, "USER-UPDATE-MESSAGE " + name + " " + "has connected to the server.");
                 }
                 
                 //add new user to list of current users
                 writers.add(out);
                 
-                System.out.println(name.split(" ")[0] + " connected at - "+ timeStamp);
+                System.out.println(name.split(" ")[0] + " connected at - " + timeStamp);
                 
                 // Accept messages from this client and broadcast them. Ignore other clients that cannot be broadcasted to.
                 while (true) {
-                    String input = in.readLine();
+                    String input = AES.decrypt(userAesKey, in.readLine());
                     if (input == null) {
                         return;
                     }
                     for (PrintWriter writer : writers) {
-                        writer.println("MESSAGE " + name + " " + input);
+                    	sendMessage(writer, "MESSAGE " + name + " " + input);
                     }
                 }
             }
             
-            catch (IOException e) {
+            catch (IOException | InvalidKeySpecException | NoSuchAlgorithmException e) {
             	for (PrintWriter writer : writers) {
-            		writer.println("DISCONNECTED-MESSAGE " + name + " " + "has disconnected form the server.");
-                    writer.println("REMOVEUSER " + name);
+            		writer.println(AES.encrypt(serverAesKey, AES.getInitVector(random), ("DISCONNECTED-MESSAGE " + name + " " + "has disconnected from the server.")));
+            		writer.println(AES.encrypt(serverAesKey, AES.getInitVector(random), ("REMOVEUSER " + name)));
                 }
             	System.out.println(name.split(" ")[0] + " disconnected at - "+ timeStamp);
-            } finally {
+            }
+            
+            finally {
                 // This client is going down! Remove its name and its print writer from the sets, and close its socket.
                 if (name != null) {
                     names.remove(name);
@@ -152,10 +149,15 @@ public class Server {
                 }
                 try {
                     socket.close();
-                } catch (IOException e) {
+                }
+                catch (IOException e) {
                 	//catch nothing!!!!!
                 }
             }
         }
+    }
+    
+    private static void sendMessage(PrintWriter out, String message) {
+    	out.println(AES.encrypt(serverAesKey, AES.getInitVector(random), message));
     }
 }
