@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.ResourceBundle;
 import java.util.Scanner;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -22,6 +23,8 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class UserInfoController {
@@ -140,10 +143,12 @@ public class UserInfoController {
     		});
     		
     		if(failedConnection) {
-    			System.out.println("HElllo");
     			notFinished.setOpacity(1);
-    	    	notFinished.setText("Duplicate name, enter another.");
+    			notFinished.setFont(new Font(16));
+    			notFinished.setTextFill(Color.RED);
+    	    	notFinished.setText("Duplicate username, enter another.");
     	    	userText.clear();
+    	    	Platform.runLater (() ->userText.requestFocus());
         	}
         	else {
         		notFinished.setOpacity(0);
