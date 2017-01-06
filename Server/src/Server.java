@@ -21,6 +21,7 @@ import java.util.HashSet;
 public class Server {
 
     private static int portNum = 5000;
+    private static String connectPassword = "";
 	private static RSAPublicKey serverPubKey;
 	private static RSAPrivateKey serverPrivKey;
 	private static byte[] serverAesKey;
@@ -29,16 +30,37 @@ public class Server {
     private static HashSet<PrintWriter> writers = new HashSet<PrintWriter>();
     
     public static void main(String[] args) throws Exception {
-    	if(args.length > 0) {
-    		try{
-    			portNum = Integer.parseInt(args[0]);
-    		}
-    		catch(Exception e) {
-    			System.out.println("Input a proper port number. Defaulting to port 5000.");
-    		}
+    	//all of this block is just figuring out password/port with special order
+    	if(args.length == 2) {
+	    	try {
+	    		portNum = Integer.parseInt(args[0]);
+	    	}
+	    	catch(Exception e) {
+	    		connectPassword = args[0];
+	    	}
+	    	
+	    	try {
+	    		portNum = Integer.parseInt(args[1]);
+	    	}
+	    	catch(Exception e) {
+	    		connectPassword = args[1];
+	    	}
+	    	
+	    	System.out.println("Server started, with password \"" + connectPassword + "\", on port: " + portNum);
     	}
-    	
-        System.out.println("The chat server is running on port: " + portNum);
+    	else if(args.length == 1) {
+    		try {
+	    		portNum = Integer.parseInt(args[0]);
+	    		System.out.println("Server started, no password, on port: " + portNum);
+	    	}
+	    	catch(Exception e) {
+	    		connectPassword = args[0];
+	    		System.out.println("Server started, with password \"" + connectPassword + "\", on port: " + portNum);
+	    	}
+    	}
+    	else {
+    		System.out.println("Server started, no password, on port: " + portNum);
+    	}
         
         //setup server RSA keys
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
@@ -96,48 +118,58 @@ public class Server {
                 //send and receive AES keys
                 out.println(RSA.encrypt(userPubKey, Base64.getEncoder().encodeToString(serverAesKey)));
                 userAesKey = Base64.getDecoder().decode(RSA.decrypt(serverPrivKey, in.readLine()));
-
-                //get user info and add them to list
-                sendMessage(out, "REQUESTNAME");
-                username = AES.decrypt(userAesKey, in.readLine());
                 
-                for(String existingUser: names) {
-                	if(existingUser.split(" ")[0].equals(username.split(" ")[0])) {
-                		sendMessage(out, "DUPLICATE-USERNAME");
-                		isFailedConnection = true;
-                	}
+                //request password
+                sendMessage(out, "REQUESTPASSWORD");
+                String userEnteredPassword = AES.decrypt(userAesKey, in.readLine());
+                if(!userEnteredPassword.equals(connectPassword)) {
+                	sendMessage(out, "INCORRECT-PASSWORD");
+                	isFailedConnection = true;
                 }
                 
                 if(!isFailedConnection) {
-	                names.add(username);
-	                
-	                sendMessage(out, "CONNECTED");
-	                
-	                //sends all connected usernames to new user
-	                for(String n: names) {
-	                	sendMessage(out, "NEWUSER " + n);
+	                //get user info and add them to list
+	                sendMessage(out, "REQUESTNAME");
+	                username = AES.decrypt(userAesKey, in.readLine());
+                
+	                for(String existingUser: names) {
+	                	if(existingUser.split(" ")[0].equals(username.split(" ")[0])) {
+	                		sendMessage(out, "DUPLICATE-USERNAME");
+	                		isFailedConnection = true;
+	                	}
 	                }
-	                
-	                //send new username to all other users
-	                for(PrintWriter w: writers) {
-	                	sendMessage(w, "NEWUSER " + username);
-	                	sendMessage(w, "USER-UPDATE-MESSAGE " + username + " " + "has connected to the server.");
-	                }
-	                
-	                //add new user to list of current users
-	                writers.add(out);
-	                
-	                System.out.println(username.split(" ")[0] + " connected at - " + timeStamp);
-	                
-	                // Accept messages from this client and broadcast them. Ignore other clients that cannot be broadcasted to.
-	                while (true) {
-	                    String input = AES.decrypt(userAesKey, in.readLine());
-	                    if (input == null) {
-	                        return;
-	                    }
-	                    for (PrintWriter writer : writers) {
-	                    	sendMessage(writer, "MESSAGE " + username + " " + input);
-	                    }
+                
+	                if(!isFailedConnection) {
+		                names.add(username);
+		                
+		                sendMessage(out, "CONNECTED");
+		                
+		                //sends all connected usernames to new user
+		                for(String n: names) {
+		                	sendMessage(out, "NEWUSER " + n);
+		                }
+		                
+		                //send new username to all other users
+		                for(PrintWriter w: writers) {
+		                	sendMessage(w, "NEWUSER " + username);
+		                	sendMessage(w, "USER-UPDATE-MESSAGE " + username + " " + "has connected to the server.");
+		                }
+		                
+		                //add new user to list of current users
+		                writers.add(out);
+		                
+		                System.out.println(username.split(" ")[0] + " connected at - " + timeStamp);
+		                
+		                // Accept messages from this client and broadcast them. Ignore other clients that cannot be broadcasted to.
+		                while (true) {
+		                    String input = AES.decrypt(userAesKey, in.readLine());
+		                    if (input == null) {
+		                        return;
+		                    }
+		                    for (PrintWriter writer : writers) {
+		                    	sendMessage(writer, "MESSAGE " + username + " " + input);
+		                    }
+		                }
 	                }
                 }
             }

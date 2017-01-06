@@ -4,6 +4,7 @@ public class User {
 	private String userServer = null;
 	private String userName = null;
 	private String userColor = null; //Black, Blue, Green, Purple, Red
+	private String userPass = null;
 	private int userPort = 5000;
 	
 	 //////////////////////////////////////////////
@@ -12,11 +13,12 @@ public class User {
 	
 	public User(){};
 	
-	public User(String server, String name, String color, int port) {
+	public User(String server, String name, String color, String password, int port) {
 		userServer = server;
 		userName = name;
 		userColor = color;
 		userPort = port;
+		userPass = password;
 	}
 	
 	 //////////////////////////////////////////////
@@ -37,6 +39,10 @@ public class User {
 		userColor = color;
 	}
 	
+	public void setPassword(String pass){
+		userPass = pass;
+	}
+	
 	public void setPort(int port){
 		userPort = port;
 	}
@@ -53,6 +59,10 @@ public class User {
 	
 	public String getColor(){
 		return userColor;
+	}
+	
+	public String getPassword(){
+		return userPass;
 	}
 	
 	public int getPort(){

@@ -143,22 +143,14 @@ public class ChatController {
 				            	
 				            	Platform.runLater (() -> updateUserList());
 				            }
+				            else if(line.startsWith("REQUESTPASSWORD")) {
+				            	sendMessage(out, user.getPassword());
+				            }
 				            else if(line.startsWith("DUPLICATE-USERNAME")) {
-				            	Platform.runLater (() -> {
-				            		try {
-						            	Stage stage = (Stage) root.getScene().getWindow();
-					    				stage.close();
-					    				UserInfoController.setTextForLabel();
-					    				URL fxmlUrlInfo = this.getClass().getClassLoader().getResource("resources/userInfo.fxml");
-					    				Pane info = FXMLLoader.<Pane> load(fxmlUrlInfo);
-										stage.setScene(new Scene(info));
-										stage.setTitle("Chat Client: Duplicate name, enter antoher.");
-										stage.show();
-				            		}
-				            		catch(Exception e) {
-				            			e.printStackTrace();
-				            		}
-				            	});
+				            	goBackToInfoController("Duplicate username, enter another.");
+				            }
+				            else if(line.startsWith("INCORRECT-PASSWORD")) {
+				            	goBackToInfoController("Incorrect password, try again.");
 				            }
 				            scanner.close();
 				        } //end if statement
@@ -216,6 +208,36 @@ public class ChatController {
     	Platform.runLater (() -> {
     		chatFlow.getChildren().add(t); //add to chat
     		chatScroll.setVvalue(1); //set scroll to bottom so it scrolls with text
+    	});
+    }
+    
+    private void goBackToInfoController(String text) {
+    	if(text.startsWith("Duplicate")) {
+    		if(UserInfoController.getIncorrectPassword()) {
+    			UserInfoController.setIncorretPassword(false);
+    		}
+    		UserInfoController.setDuplicateUser(true);
+    	}
+    	else if(text.startsWith("Incorrect")) {
+    		if(UserInfoController.getDuplicateUser()) {
+    			UserInfoController.setDuplicateUser(false);
+    		}
+    		UserInfoController.setIncorretPassword(true);
+    	}
+    	
+    	Platform.runLater (() -> {
+    		try {
+            	Stage stage = (Stage) root.getScene().getWindow();
+				stage.close();
+				URL fxmlUrlInfo = this.getClass().getClassLoader().getResource("resources/userInfo.fxml");
+				Pane info = FXMLLoader.<Pane> load(fxmlUrlInfo);
+				stage.setScene(new Scene(info));
+				stage.setTitle("ERROR: " + text);
+				stage.show();
+    		}
+    		catch(Exception e) {
+    			e.printStackTrace();
+    		}
     	});
     }
     

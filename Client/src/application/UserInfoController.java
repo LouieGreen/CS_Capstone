@@ -30,6 +30,8 @@ import javafx.stage.Stage;
 public class UserInfoController {
 	
 	private static User user = new User();
+	private static boolean failedConnection = false;
+	private static boolean isIncorretPassword = false;
 	
 	///// @FXML Objects /////
     @FXML private ResourceBundle resources;
@@ -42,6 +44,7 @@ public class UserInfoController {
     @FXML private TextField serverText;
     @FXML private TextField userText;
     @FXML private TextField portText;
+    @FXML private TextField passwordText;
     @FXML private Label colorLabel;
     @FXML private RadioButton blackButton;
     @FXML private ToggleGroup color;
@@ -55,7 +58,7 @@ public class UserInfoController {
     @FXML private RadioButton deletButton;
     @FXML private Button submit;
     @FXML private Label notFinished;
-    	  private static boolean failedConnection = false;
+    @FXML private Label passwordLabel;
 
     @FXML
     void initialize() {
@@ -93,12 +96,18 @@ public class UserInfoController {
     		submit.setOnAction(e -> {
     			//check server field is filled in --     check username is filled in and that the field isn't just spaces --         check the port field is filled   -- check color is selected
     			if(serverText.getText().length() != 0 && userText.getText().length() != 0 && !userText.getText().trim().isEmpty() && portText.getText().length() != 0 && color.getSelectedToggle() != null) {
-    				user.setName(userText.getText().replaceAll(" ", ""));
-    				user.setServer(serverText.getText());
-    				user.setColor(color.getSelectedToggle().getUserData().toString());
-    				
     				Integer port = new Integer(portText.getText().trim());
     				user.setPort(port);
+    				user.setName(userText.getText().replaceAll(" ", ""));
+    				user.setServer(serverText.getText().trim());
+    				user.setColor(color.getSelectedToggle().getUserData().toString());
+    				
+    				if(passwordText.getText().length() == 0) {
+    					user.setPassword(new String(""));
+    				}
+    				else {
+    					user.setPassword(passwordText.getText().trim());
+    				}
     				
     				//save settings to file
     				if(saveButton.isSelected()) {
@@ -150,6 +159,12 @@ public class UserInfoController {
     	    	userText.clear();
     	    	Platform.runLater (() ->userText.requestFocus());
         	}
+    		else if(isIncorretPassword) {
+    			notFinished.setOpacity(1);
+    			notFinished.setFont(new Font(16));
+    			notFinished.setTextFill(Color.RED);
+    	    	notFinished.setText("Incorrect password.");
+    		}
         	else {
         		notFinished.setOpacity(0);
         		notFinished.setText("Please fill out fields.");
@@ -160,10 +175,20 @@ public class UserInfoController {
     	}
     }
     
-    protected static void setTextForLabel() {
-    	failedConnection = true; 
+    protected static void setIncorretPassword(boolean flag){
+    	isIncorretPassword = flag;
+    }
+    protected static boolean getIncorrectPassword() {
+    	return isIncorretPassword;
+    }
+    
+    protected static void setDuplicateUser(boolean flag) {
+    	failedConnection = flag; 
 	}
-
+    protected static boolean getDuplicateUser() {
+    	return failedConnection;
+    }
+    
 	protected static User getUser() {
     	return user;
     }
