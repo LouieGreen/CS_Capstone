@@ -64,6 +64,16 @@
                <font>
                   <Font size="14.0" />
                </font></TextField>
+            <TextField id="text-field" fx:id="plainTextPassword" promptText="Enter password for the server..." GridPane.columnIndex="1" GridPane.rowIndex="3">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </TextField>
+			<PasswordField id="text-field" fx:id="passwordText" promptText="Enter password for the server..." GridPane.columnIndex="1" GridPane.rowIndex="3">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </PasswordField>
             <Label fx:id="colorLabel" alignment="CENTER_RIGHT" contentDisplay="CENTER" prefHeight="122.0" prefWidth="195.0" text="Text Color: " textAlignment="RIGHT" GridPane.rowIndex="5">
                <font>
                   <Font size="14.0" />
@@ -130,21 +140,11 @@
                   <Font size="14.0" />
                </font>
             </Label>
-            <PasswordField id="text-field" fx:id="passwordText" promptText="Enter password for the server..." GridPane.columnIndex="1" GridPane.rowIndex="3">
-               <font>
-                  <Font size="14.0" />
-               </font>
-            </PasswordField>
             <CheckBox fx:id="showPassword" mnemonicParsing="false" prefHeight="17.0" prefWidth="380.0" text="Show/Hide Password" GridPane.columnIndex="1" GridPane.rowIndex="4">
                <font>
                   <Font size="10.0" />
                </font>
             </CheckBox>
-            <TextField id="text-field" fx:id="plainTextPassword" promptText="Enter password for the server..." GridPane.columnIndex="1" GridPane.rowIndex="3">
-               <font>
-                  <Font size="14.0" />
-               </font>
-            </TextField>
          </children>
       </GridPane>
    </children>
