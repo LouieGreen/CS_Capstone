@@ -46,20 +46,20 @@ public class Server {
 	    		connectPassword = args[1];
 	    	}
 	    	
-	    	System.out.println("Server started, with password \"" + connectPassword + "\", on port: " + portNum);
+	    	System.out.println("Server started, with password \"" + connectPassword + "\", on port: " + portNum + "\n");
     	}
     	else if(args.length == 1) {
     		try {
 	    		portNum = Integer.parseInt(args[0]);
-	    		System.out.println("Server started, no password, on port: " + portNum);
+	    		System.out.println("Server started, no password, on port: " + portNum + "\n");
 	    	}
 	    	catch(Exception e) {
 	    		connectPassword = args[0];
-	    		System.out.println("Server started, with password \"" + connectPassword + "\", on port: " + portNum);
+	    		System.out.println("Server started, with password \"" + connectPassword + "\", on port: " + portNum + "\n");
 	    	}
     	}
     	else {
-    		System.out.println("Server started, no password, on port: " + portNum);
+    		System.out.println("Server started, no password, on port: " + portNum + "\n");
     	}
         
         //setup server RSA keys

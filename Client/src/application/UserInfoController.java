@@ -33,6 +33,7 @@ public class UserInfoController {
 	private static User user = new User();
 	private static boolean failedConnection = false;
 	private static boolean isIncorretPassword = false;
+	private boolean passwordIsHidden = false;
 	
 	///// @FXML Objects /////
     @FXML private ResourceBundle resources;
@@ -98,11 +99,16 @@ public class UserInfoController {
     		redButton.setUserData("Red");
     		
     		//allows toggle of hidden password
-    		plainTextPassword.setManaged(false);
-    		plainTextPassword.setVisible(false);
-    		plainTextPassword.managedProperty().bind(showPassword.selectedProperty());
-    		plainTextPassword.visibleProperty().bind(showPassword.selectedProperty());
+    		showPassword.setFocusTraversable(false);
+    		plainTextPassword.setManaged(passwordIsHidden);
+    		plainTextPassword.setVisible(passwordIsHidden);
     		plainTextPassword.textProperty().bindBidirectional(passwordText.textProperty());
+    		
+    		showPassword.setOnAction(e -> {
+    			passwordIsHidden = !passwordIsHidden;
+    			plainTextPassword.setManaged(passwordIsHidden);
+        		plainTextPassword.setVisible(passwordIsHidden);
+    		});
  			
     		submit.setOnAction(e -> {
     			//check server field is filled in --     check username is filled in and that the field isn't just spaces --         check the port field is filled   -- check color is selected

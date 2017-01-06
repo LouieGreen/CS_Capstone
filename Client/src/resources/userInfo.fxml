@@ -60,20 +60,20 @@
                <font>
                   <Font size="14.0" />
                </font></TextField>
-            <TextField id="text-field" fx:id="portText" promptText="Enter the port to connect to server on...." GridPane.columnIndex="1" GridPane.rowIndex="2">
+            <TextField id="text-field" fx:id="portText" promptText="Enter the port to connect to server on..." GridPane.columnIndex="1" GridPane.rowIndex="2">
                <font>
                   <Font size="14.0" />
                </font></TextField>
-            <TextField id="text-field" fx:id="plainTextPassword" promptText="Enter password for the server..." GridPane.columnIndex="1" GridPane.rowIndex="3">
-               <font>
-                  <Font size="14.0" />
-               </font>
-            </TextField>
 			<PasswordField id="text-field" fx:id="passwordText" promptText="Enter password for the server..." GridPane.columnIndex="1" GridPane.rowIndex="3">
                <font>
                   <Font size="14.0" />
                </font>
             </PasswordField>
+            <TextField id="text-field" fx:id="plainTextPassword" promptText="Enter password for the server..." GridPane.columnIndex="1" GridPane.rowIndex="3">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </TextField>
             <Label fx:id="colorLabel" alignment="CENTER_RIGHT" contentDisplay="CENTER" prefHeight="122.0" prefWidth="195.0" text="Text Color: " textAlignment="RIGHT" GridPane.rowIndex="5">
                <font>
                   <Font size="14.0" />
