@@ -16,6 +16,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
@@ -45,6 +46,7 @@ public class UserInfoController {
     @FXML private TextField userText;
     @FXML private TextField portText;
     @FXML private TextField passwordText;
+    @FXML private TextField plainTextPassword;
     @FXML private Label colorLabel;
     @FXML private RadioButton blackButton;
     @FXML private ToggleGroup color;
@@ -59,6 +61,7 @@ public class UserInfoController {
     @FXML private Button submit;
     @FXML private Label notFinished;
     @FXML private Label passwordLabel;
+    @FXML private CheckBox showPassword;
 
     @FXML
     void initialize() {
@@ -87,11 +90,19 @@ public class UserInfoController {
     			input.close();
     		}
   			
+    		//sets text from color selection radio buttons
     		blackButton.setUserData("Black");
     		blueButton.setUserData("Blue");
     		greenButton.setUserData("Green");
     		purpleButton.setUserData("Purple");
     		redButton.setUserData("Red");
+    		
+    		//allows toggle of hidden password
+    		plainTextPassword.setManaged(false);
+    		plainTextPassword.setVisible(false);
+    		plainTextPassword.managedProperty().bind(showPassword.selectedProperty());
+    		plainTextPassword.visibleProperty().bind(showPassword.selectedProperty());
+    		plainTextPassword.textProperty().bindBidirectional(passwordText.textProperty());
  			
     		submit.setOnAction(e -> {
     			//check server field is filled in --     check username is filled in and that the field isn't just spaces --         check the port field is filled   -- check color is selected
