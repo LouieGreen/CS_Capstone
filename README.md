@@ -16,8 +16,12 @@ This project is meant to be coded completely in Java and not to use any outside 
 
 To use this project there needs to be a server setup and running, this server either needs to be on your local network or be addressable via IP address and have the desired port port-forwarded to the server.
 
-To run the server on a desired port the port must be passed in via the command-line as shown below (batch included file for use on Windows machines):
+To run the server on a desired port the port with the desired password, they must be passed in via the command-line as shown below, the order does not matter (batch included file for use on Windows machines):
 ```
-java -jar Server.jar 5001
+java -jar Server.jar                    - port 5000, no password
+java -jar Server.jar "PORT"             - port specified, no password
+java -jar Server.jar "PASSWORD"         - port 5000, specified password
+java -jar Server.jar "PASSWORD" "PORT"  - specified password, specified port
+java -jar Server.jar "PORT" "PASSWORD"  - specified port, specified password
 ```
-If a port is not specified or the specified port is invaild the server deafaults to running on port 5000.
+If a port is not specified or the specified port is invaild the server deafaults to running on port 5000. If the password is not specified the password defaults to no password.
