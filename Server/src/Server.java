@@ -174,7 +174,7 @@ public class Server {
                 }
             }
             
-            catch (IOException | InvalidKeySpecException | NoSuchAlgorithmException e) {
+            catch (Exception e) {
             	if(!isFailedConnection) {
 	            	for (PrintWriter writer : writers) {
 	            		sendMessage(writer, "DISCONNECTED-MESSAGE " + username + " " + "has disconnected from the server.");
