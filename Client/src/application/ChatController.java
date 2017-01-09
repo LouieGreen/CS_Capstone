@@ -17,6 +17,10 @@ import java.util.Base64;
 import java.util.ResourceBundle;
 import java.util.Scanner;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -37,12 +41,13 @@ import javafx.stage.Stage;
 public class ChatController {
 	
 	private final User user = UserInfoController.getUser();
-	private final KeyCombination kb = new KeyCodeCombination(KeyCode.ENTER, KeyCombination.SHIFT_DOWN);
+	private final KeyCombination kb = new KeyCodeCombination(KeyCode.M, KeyCombination.CONTROL_ANY);
 	private ArrayList <String> nameList = new ArrayList<>();
 	private ArrayList <String> colorList = new ArrayList<>();
 	private BufferedReader in;
 	private Socket socket;
 	private PrintWriter out;
+	private boolean muted = false;
 	
 	private RSAPublicKey userPubKey;
 	private RSAPrivateKey userPrivKey;
@@ -65,16 +70,13 @@ public class ChatController {
     
     @FXML 
     void initialize() {
-        
         Task<Void> task = new Task<Void>() {
 			@Override
 			public Void call() throws Exception {
 				// Make connection and initialize streams
-				@SuppressWarnings("unused")
-				String junk = null;
-				
 				Scanner scanner = null;
 			    String serverAddress = user.getServer();
+			    
 			    try {
 			    	//generate and store public and private keys
 			    	KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
@@ -115,8 +117,17 @@ public class ChatController {
 				        if(line != null) {
 				        	scanner = new Scanner(line);
 				        	
-				            if (line.startsWith("MESSAGE") || line.startsWith("USER-UPDATE-MESSAGE") || line.startsWith("DISCONNECTED-MESSAGE")) {
+				            if (line.startsWith("MESSAGE")) {
 				            	addChatMessage(scanner);
+				            	if(!muted && !line.startsWith("MESSAGE " + user.getName())) {
+				            		playSound("notification.wav");
+				            	}
+				            }
+				            else if(line.startsWith("USER-UPDATE-MESSAGE") || line.startsWith("DISCONNECTED-MESSAGE")) {
+				            	addChatMessage(scanner);
+				            	if(!muted) {
+				            		playSound("connection.wav");
+				            	}
 				            }
 				            else if (line.startsWith("CONNECTED")) {
 				                input.setEditable(true);
@@ -125,17 +136,17 @@ public class ChatController {
 				            	sendMessage(out, user.getName() + " " + user.getColor());
 				            }
 				            else if(line.startsWith("NEWUSER")){
-				            	junk = scanner.next(); //eats NEWUSER
+				            	scanner.next(); //eats NEWUSER
 				            	nameList.add(scanner.next()); //gets name
 				            	colorList.add(scanner.next()); //gets color
 				            	
 				            	Platform.runLater (() -> updateUserList());
 				            }
 				            else if(line.startsWith("REMOVEUSER")){
-				            	junk = scanner.next(); //eats REMOVEUSER
+				            	scanner.next(); //eats REMOVEUSER
 				            	String nameToRemove = scanner.next(); //get user name
 				            	
-				            	junk = scanner.nextLine(); //clear rest of line
+				            	scanner.nextLine(); //clear rest of line
 				            	
 				            	int i = nameList.indexOf(nameToRemove);
 				            	nameList.remove(i);
@@ -167,15 +178,17 @@ public class ChatController {
 			}
 			
 			if(kb.match(e)){
-				input.appendText("\n");
+				muted = !muted;
 			}
 			
 			if((e.getCode() == KeyCode.ENTER) && !kb.match(e)){
-				String userText = (input.getText());
-				sendMessage(out, userText);
-				input.clear();
+				String userText = input.getText();
+				if(userText.trim().length() > 0) {
+					sendMessage(out, userText);
+					chatScroll.setVvalue(1);
+				}
 				e.consume();
-				chatScroll.setVvalue(1);
+				input.clear();
 			}
         });
     } //end init
@@ -243,5 +256,21 @@ public class ChatController {
     
     private void sendMessage(PrintWriter out, String message) {
     	out.println(AES.encrypt(userAesKey, AES.getInitVector(random), message));
+    }
+    
+    private static synchronized void playSound(String file) {
+    	new Thread(new Runnable() {
+    		public void run() {
+    			try {
+    				AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(this.getClass().getClassLoader().getResource("resources/" + file));
+    				Clip clip = AudioSystem.getClip();
+    			    clip.open(audioInputStream);
+    			    clip.start();
+    			} 
+    			catch (Exception e) {
+    				e.printStackTrace();
+    			}
+    		}
+    	}).start();
     }
 }
