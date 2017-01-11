@@ -12,7 +12,7 @@ These were some of the features that I was hoping to add and bring into the new,
 This project is meant to be coded completely in Java and not to use any outside libraries, this is so that all work done is my own and the project requires no extra setup or maintenance.
 
 ## Setup and use
-**Java 8 must be installed on both the client and the server.**
+**Java 8 must be installed on both the client and the server. Depending on the OS of the computer running the server the Java JDK might be necessary.**
 
 To use this project there needs to be a server setup and running, this server either needs to be on your local network or be addressable via IP address and have the desired port port-forwarded to the server.
 
