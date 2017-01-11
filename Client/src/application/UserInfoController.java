@@ -66,6 +66,7 @@ public class UserInfoController {
 
     @FXML
     void initialize() {
+    	String operatingSystem = System.getProperty("os.name");
     	File settingsFile = new File(".savedSettings.txt");
     	Path pathToSettingsFile = FileSystems.getDefault().getPath(".savedSettings.txt");
     	
@@ -129,13 +130,15 @@ public class UserInfoController {
     				//save settings to file
     				if(saveButton.isSelected()) {
     					try {
-    						if(settingsFile.exists()) {
+    						if(settingsFile.exists() && operatingSystem.contains("Windows")) {
     							Files.setAttribute(pathToSettingsFile, "dos:hidden", false);
     						}
     						PrintWriter p = new PrintWriter(settingsFile);
     						p.println(user.getServer() + "\n" + user.getName() + "\n" + user.getPort() + "\n"  + user.getColor());
     						p.close();
-    						Files.setAttribute(pathToSettingsFile, "dos:hidden", true);
+    						if(operatingSystem.contains("Windows")) {
+    							Files.setAttribute(pathToSettingsFile, "dos:hidden", true);
+    						}
     					}
     					catch (FileNotFoundException e1) {
     						e1.printStackTrace();
@@ -147,7 +150,6 @@ public class UserInfoController {
     					if(settingsFile.exists()){
     						settingsFile.delete();
     					}
-    					
     				}
     				Stage stage = (Stage) submit.getScene().getWindow();
     				stage.close();
