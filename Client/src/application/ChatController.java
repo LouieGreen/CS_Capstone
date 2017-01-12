@@ -39,7 +39,7 @@ import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
 public class ChatController {
-	
+
 	private final User user = UserInfoController.getUser();
 	private final KeyCombination kb = new KeyCodeCombination(KeyCode.M, KeyCombination.CONTROL_ANY);
 	private ArrayList <String> nameList = new ArrayList<>();
@@ -48,15 +48,15 @@ public class ChatController {
 	private Socket socket;
 	private PrintWriter out;
 	private boolean muted = false;
-	
+
 	private RSAPublicKey userPubKey;
 	private RSAPrivateKey userPrivKey;
 	private RSAPublicKey serverPubKey;
-	
+
 	private byte[] serverAesKey;
 	private byte[] userAesKey;
 	private SecureRandom random = new SecureRandom();
-	
+
 	///// @FXML Objects /////
     @FXML private ResourceBundle resources;
     @FXML private URL location;
@@ -67,8 +67,8 @@ public class ChatController {
     @FXML private TextFlow chatFlow;
     @FXML private TextFlow namesFlow;
     @FXML private TextArea input;
-    
-    @FXML 
+
+    @FXML
     void initialize() {
         Task<Void> task = new Task<Void>() {
 			@Override
@@ -76,7 +76,7 @@ public class ChatController {
 				// Make connection and initialize streams
 				Scanner scanner = null;
 			    String serverAddress = user.getServer();
-			    
+
 			    try {
 			    	//generate and store public and private keys
 			    	KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
@@ -84,7 +84,7 @@ public class ChatController {
 			        KeyPair keyPair = keyGen.generateKeyPair();
 			        userPubKey = (RSAPublicKey) keyPair.getPublic();
 			        userPrivKey = (RSAPrivateKey) keyPair.getPrivate();
-			        
+
 			        //connect to server and setup streams
 					socket = new Socket(serverAddress, user.getPort());
 					in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -92,20 +92,20 @@ public class ChatController {
 				} catch (Exception e) {
 					Platform.runLater (() -> input.setText("Failed to connect to: " + serverAddress + ":" + user.getPort()));
 				}
-			    
+
 			    //		Set up RSA Keys		//
 			    //get server public key ..... re-create key from bytes ..... send our public key
 			    byte[] serverPubKeyBytes = Base64.getDecoder().decode(in.readLine());
 			    serverPubKey = (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(serverPubKeyBytes));
 			    out.println(Base64.getEncoder().encodeToString(userPubKey.getEncoded()));
-			    
+
 			    //create SecureRandom object with random seed
 			    byte seed[] = random.generateSeed(20);
 				random.setSeed(seed);
-			    
+
 			    //generate AES key and IV
 				userAesKey = AES.generateKey();
-				
+
 				//send and receive AES keys
 			    serverAesKey = Base64.getDecoder().decode(RSA.decrypt(userPrivKey, in.readLine()));
 			    out.println(RSA.encrypt(serverPubKey, Base64.getEncoder().encodeToString(userAesKey)));
@@ -113,10 +113,10 @@ public class ChatController {
 			    // Process all messages from server, according to the protocol.
 			        while (true) {
 			            String line = AES.decrypt(serverAesKey, in.readLine());
-			            
+
 				        if(line != null) {
 				        	scanner = new Scanner(line);
-				        	
+
 				            if (line.startsWith("MESSAGE")) {
 				            	addChatMessage(scanner);
 				            	if(!muted && !line.startsWith("MESSAGE " + user.getName())) {
@@ -139,19 +139,19 @@ public class ChatController {
 				            	scanner.next(); //eats NEWUSER
 				            	nameList.add(scanner.next()); //gets name
 				            	colorList.add(scanner.next()); //gets color
-				            	
+
 				            	Platform.runLater (() -> updateUserList());
 				            }
 				            else if(line.startsWith("REMOVEUSER")){
 				            	scanner.next(); //eats REMOVEUSER
 				            	String nameToRemove = scanner.next(); //get user name
-				            	
+
 				            	scanner.nextLine(); //clear rest of line
-				            	
+
 				            	int i = nameList.indexOf(nameToRemove);
 				            	nameList.remove(i);
 				            	colorList.remove(i);
-				            	
+
 				            	Platform.runLater (() -> updateUserList());
 				            }
 				            else if(line.startsWith("REQUESTPASSWORD")) {
@@ -171,16 +171,16 @@ public class ChatController {
 			Thread th = new Thread(task);
 			th.setDaemon(true);
 			th.start();
-        
+
         input.setOnKeyPressed(e -> {
         	if (e.getCode() == KeyCode.ESCAPE){
         		chatFlow.getChildren().clear();
 			}
-			
+
 			if(kb.match(e)){
 				muted = !muted;
 			}
-			
+
 			if((e.getCode() == KeyCode.ENTER) && !kb.match(e)){
 				String userText = input.getText();
 				if(userText.trim().length() > 0) {
@@ -192,24 +192,24 @@ public class ChatController {
 			}
         });
     } //end init
-    
+
     private void updateUserList() {
     	namesFlow.getChildren().clear();
-		
-		for(int i=0; i<nameList.size(); i++){ 
+
+		for(int i=0; i<nameList.size(); i++){
 			Text t = new Text();
 			t.setText(nameList.get(i) + "\n");
 			t.setStyle("-fx-fill: " + colorList.get(i) + ";");
 			namesFlow.getChildren().add(t);
 		}
 	}
-    
+
     private void addChatMessage(Scanner scanner) {
     	String header = scanner.next(); //eats header message
     	String inUserName = scanner.next(); // gets name
     	String inUserColor = scanner.next(); //gets color
     	String inUserMessage = scanner.nextLine().trim(); //gets message
-    	
+
     	Text t;
     	if(header.equals("MESSAGE")) {
     		t = new Text(inUserName + ": " +  inUserMessage + "\n"); //create text object with message
@@ -223,7 +223,7 @@ public class ChatController {
     		chatScroll.setVvalue(1); //set scroll to bottom so it scrolls with text
     	});
     }
-    
+
     private void goBackToInfoController(String text) {
     	if(text.startsWith("Duplicate")) {
     		if(UserInfoController.getIncorrectPassword()) {
@@ -237,7 +237,7 @@ public class ChatController {
     		}
     		UserInfoController.setIncorretPassword(true);
     	}
-    	
+
     	Platform.runLater (() -> {
     		try {
             	Stage stage = (Stage) root.getScene().getWindow();
@@ -253,11 +253,11 @@ public class ChatController {
     		}
     	});
     }
-    
+
     private void sendMessage(PrintWriter out, String message) {
     	out.println(AES.encrypt(userAesKey, AES.getInitVector(random), message));
     }
-    
+
     private static synchronized void playSound(String file) {
     	new Thread(new Runnable() {
     		public void run() {
@@ -266,7 +266,7 @@ public class ChatController {
     				Clip clip = AudioSystem.getClip();
     			    clip.open(audioInputStream);
     			    clip.start();
-    			} 
+    			}
     			catch (Exception e) {
     				e.printStackTrace();
     			}

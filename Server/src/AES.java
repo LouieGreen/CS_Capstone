@@ -13,17 +13,17 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class AES {
-	
+
     public static String encrypt(byte[] key, byte[] initVector, String value) {
     	byte[] encrypted = null;
-    	try {    
+    	try {
         	IvParameterSpec iv = new IvParameterSpec(initVector);
-            SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
+        	SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
 
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-            cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
+        	Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+        	cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
 
-            encrypted = cipher.doFinal(value.getBytes());
+        	encrypted = cipher.doFinal(value.getBytes());
     	}
     	catch(NoSuchAlgorithmException e) {System.out.println("NoSuchAlgorithmException, AES encryption failed.");}
     	catch(NoSuchPaddingException e) {System.out.println("NoSuchPaddingException, AES encryption failed.");}
@@ -31,8 +31,8 @@ public class AES {
     	catch(InvalidAlgorithmParameterException e) {System.out.println("InvalidAlgorithmParameterException, AES encryption failed.");}
     	catch(IllegalBlockSizeException e) {System.out.println("IllegalBlockSizeException, AES encryption failed.");}
     	catch(BadPaddingException e) {System.out.println("BadPaddingException, AES encryption failed.");}
-    	
-        return Base64.getEncoder().encodeToString(initVector) + Base64.getEncoder().encodeToString(encrypted);
+
+      		return Base64.getEncoder().encodeToString(initVector) + Base64.getEncoder().encodeToString(encrypted);
     }
 
     public static String decrypt(byte[] key, String encrypted) {
@@ -40,10 +40,10 @@ public class AES {
     	try {
     		IvParameterSpec iv = new IvParameterSpec(Base64.getDecoder().decode(encrypted.substring(0, 24)));
     		SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
-	
+
 	        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
 	        cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
-	
+
 	        original = cipher.doFinal(Base64.getDecoder().decode(encrypted.substring(24)));
 		}
     	catch(NoSuchAlgorithmException e) {System.out.println("NoSuchAlgorithmException, AES encryption failed.");}
@@ -52,13 +52,13 @@ public class AES {
     	catch(InvalidAlgorithmParameterException e) {System.out.println("InvalidAlgorithmParameterException, AES encryption failed.");}
     	catch(IllegalBlockSizeException e) {System.out.println("IllegalBlockSizeException, AES encryption failed.");}
     	catch(BadPaddingException e) {System.out.println("BadPaddingException, AES encryption failed.");}
-    	
+
         return new String(original);
     }
-    
+
     public static byte[] generateKey() {
     	byte[] key = null;
-    	
+
     	try {
 			KeyGenerator keygen;
 			keygen = KeyGenerator.getInstance("AES");
@@ -67,14 +67,14 @@ public class AES {
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
-    	
+
     	return key;
     }
-    
+
     public static byte[] getInitVector(SecureRandom random) {
 		byte iv[] = new byte[16];
 		random.nextBytes(iv);
-		
+
 		return iv;
     }
 }

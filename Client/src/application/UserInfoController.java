@@ -29,12 +29,12 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class UserInfoController {
-	
+
 	private static User user = new User();
 	private static boolean failedConnection = false;
 	private static boolean isIncorretPassword = false;
 	private boolean passwordIsHidden = false;
-	
+
 	///// @FXML Objects /////
     @FXML private ResourceBundle resources;
     @FXML private URL location;
@@ -69,11 +69,11 @@ public class UserInfoController {
     	String operatingSystem = System.getProperty("os.name");
     	File settingsFile = new File(".savedSettings.txt");
     	Path pathToSettingsFile = FileSystems.getDefault().getPath(".savedSettings.txt");
-    	
+
     	try {
     		String colorFromFile = null;
     		Scanner input = null;
-    			
+
     		//check if files exists
     		if(settingsFile.exists()){
     			input = new Scanner(settingsFile);
@@ -81,36 +81,36 @@ public class UserInfoController {
     			userText.setText(input.nextLine());
     			portText.setText(input.nextLine());
     			colorFromFile = input.nextLine();
-    			
+
     			if(colorFromFile.equals("Black")){ blackButton.setSelected(true); }
         		else if(colorFromFile.equals("Blue")){ blueButton.setSelected(true); }
         		else if(colorFromFile.equals("Green")){ greenButton.setSelected(true); }
         		else if(colorFromFile.equals("Purple")){ purpleButton.setSelected(true); }
         		else if(colorFromFile.equals("Red")){ redButton.setSelected(true); }
-    			
+
        			saveButton.setSelected(true);
     			input.close();
     		}
-  			
+
     		//sets text from color selection radio buttons
     		blackButton.setUserData("Black");
     		blueButton.setUserData("Blue");
     		greenButton.setUserData("Green");
     		purpleButton.setUserData("Purple");
     		redButton.setUserData("Red");
-    		
+
     		//allows toggle of hidden password
     		showPassword.setFocusTraversable(false);
     		plainTextPassword.setManaged(passwordIsHidden);
     		plainTextPassword.setVisible(passwordIsHidden);
     		plainTextPassword.textProperty().bindBidirectional(passwordText.textProperty());
-    		
+
     		showPassword.setOnAction(e -> {
     			passwordIsHidden = !passwordIsHidden;
     			plainTextPassword.setManaged(passwordIsHidden);
         		plainTextPassword.setVisible(passwordIsHidden);
     		});
- 			
+
     		submit.setOnAction(e -> {
     			//check server field is filled in --     check username is filled in and that the field isn't just spaces --         check the port field is filled   -- check color is selected
     			if(serverText.getText().length() != 0 && userText.getText().length() != 0 && !userText.getText().trim().isEmpty() && portText.getText().length() != 0 && color.getSelectedToggle() != null) {
@@ -119,14 +119,14 @@ public class UserInfoController {
     				user.setName(userText.getText().replaceAll(" ", ""));
     				user.setServer(serverText.getText().trim());
     				user.setColor(color.getSelectedToggle().getUserData().toString());
-    				
+
     				if(passwordText.getText().length() == 0) {
     					user.setPassword(new String(""));
     				}
     				else {
     					user.setPassword(passwordText.getText().trim());
     				}
-    				
+
     				//save settings to file
     				if(saveButton.isSelected()) {
     					try {
@@ -153,7 +153,7 @@ public class UserInfoController {
     				}
     				Stage stage = (Stage) submit.getScene().getWindow();
     				stage.close();
-    				
+
     				try {
 						URL fxmlUrlChat = this.getClass().getClassLoader().getResource("resources/chat.fxml");
 						Pane chat = FXMLLoader.<Pane> load(fxmlUrlChat);
@@ -169,7 +169,7 @@ public class UserInfoController {
     				notFinished.setOpacity(1);
     			}
     		});
-    		
+
     		if(failedConnection) {
     			notFinished.setOpacity(1);
     			notFinished.setFont(new Font(16));
@@ -188,28 +188,28 @@ public class UserInfoController {
         		notFinished.setOpacity(0);
         		notFinished.setText("Please fill out fields.");
         	}
-    	} 
+    	}
     	catch (Exception e) {
     		e.printStackTrace();
     	}
     }
-    
+
     protected static void setIncorretPassword(boolean flag){
     	isIncorretPassword = flag;
     }
     protected static boolean getIncorrectPassword() {
     	return isIncorretPassword;
     }
-    
+
     protected static void setDuplicateUser(boolean flag) {
-    	failedConnection = flag; 
+    	failedConnection = flag;
 	}
     protected static boolean getDuplicateUser() {
     	return failedConnection;
     }
-    
+
 	protected static User getUser() {
     	return user;
     }
-        
+
 }
