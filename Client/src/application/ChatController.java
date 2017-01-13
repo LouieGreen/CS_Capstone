@@ -196,8 +196,11 @@ public class ChatController {
 	        Stage stage = (Stage) root.getScene().getWindow();
 	        
 			stage.setOnCloseRequest(e -> {
-				sendMessage(out, "CLOSING-CLIENT");
-				out.close();
+				if(out != null){
+					sendMessage(out, "CLOSING-CLIENT");
+					out.close();
+				}
+				Platform.exit();
 			});
         });
 		
