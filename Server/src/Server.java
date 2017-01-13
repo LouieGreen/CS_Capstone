@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.KeyFactory;
@@ -19,6 +20,7 @@ import java.util.HashSet;
 public class Server {
 
     private static int portNum = 5000;
+    private static String ipAddress;
     private static String connectPassword = "";
 	private static RSAPublicKey serverPubKey;
 	private static RSAPrivateKey serverPrivKey;
@@ -29,6 +31,8 @@ public class Server {
 
     public static void main(String[] args) throws Exception {
     	//all of this block is just figuring out password/port with no special order
+    	ipAddress = InetAddress.getLocalHost().getHostAddress();
+    	
     	if(args.length == 2) {
 	    	try {
 	    		portNum = Integer.parseInt(args[0]);
@@ -43,21 +47,20 @@ public class Server {
 	    	catch(Exception e) {
 	    		connectPassword = args[1];
 	    	}
-
-	    	System.out.println("Server started, with password \"" + connectPassword + "\", on port: " + portNum + "\n");
+	    	System.out.println("Server started, with password \"" + connectPassword + "\": " + ipAddress + ":" + portNum + "\n");
     	}
     	else if(args.length == 1) {
     		try {
 	    		portNum = Integer.parseInt(args[0]);
-	    		System.out.println("Server started, no password, on port: " + portNum + "\n");
+	    		System.out.println("Server started, no password: " + ipAddress + ":" + portNum + "\n");
 	    	}
 	    	catch(Exception e) {
 	    		connectPassword = args[0];
-	    		System.out.println("Server started, with password \"" + connectPassword + "\", on port: " + portNum + "\n");
+	    		System.out.println("Server started, with password \"" + connectPassword + "\": " + ipAddress + ":" + portNum + "\n");
 	    	}
     	}
     	else {
-    		System.out.println("Server started, no password, on port: " + portNum + "\n");
+    		System.out.println("Server started, no password: " + ipAddress + ":" + portNum + "\n");
     	}
 
         //setup server RSA keys
@@ -159,41 +162,46 @@ public class Server {
 
 		                // Accept messages from this client and broadcast them. Ignore other clients that cannot be broadcasted to.
 		                while (true) {
-		                    String input = AES.decrypt(userAesKey, in.readLine());
-		                    if (input == null) {
-		                        return;
-		                    }
-		                    for (PrintWriter writer : writers) {
-		                    	sendMessage(writer, "MESSAGE " + username + " " + input);
-		                    }
+		                	if(!socket.isClosed()) {
+			                    String input = AES.decrypt(userAesKey, in.readLine());
+			                    if (input == null) {
+			                        return;
+			                    }
+			                    if(!input.startsWith("CLOSING-CLIENT")) {
+				                    for (PrintWriter writer : writers) {
+				                    	sendMessage(writer, "MESSAGE " + username + " " + input);
+				                    }
+			                    }
+			                    else {
+			                    	if (username != null && !isFailedConnection) {
+			    	                    names.remove(username);
+			    	                }
+			                    	for (PrintWriter writer : writers) {
+			    	            		sendMessage(writer, "DISCONNECTED-MESSAGE " + username + " " + "has disconnected from the server.");
+			    	            		sendMessage(writer, "REMOVEUSER " + username);
+			    	                }
+			    	            	System.out.println(username.split(" ")[0] + " disconnected at - "+ timeStamp);
+			    	                if (out != null && !isFailedConnection) {
+			    	                	out.close();
+			    	                    writers.remove(out);
+			    	                }
+			    	                try {
+			    	                    socket.close();
+			    	                }
+			    	                catch (IOException e1) {
+			    	                	/*catch nothing!!!!!*/
+			    	                }
+			                    }
+		                	}
+		                	else {
+		                		return;
+		                	}
 		                }
 	                }
                 }
             }
-
             catch (Exception e) {
-            	if(!isFailedConnection) {
-	            	for (PrintWriter writer : writers) {
-	            		sendMessage(writer, "DISCONNECTED-MESSAGE " + username + " " + "has disconnected from the server.");
-	            		sendMessage(writer, "REMOVEUSER " + username);
-	                }
-	            	System.out.println(username.split(" ")[0] + " disconnected at - "+ timeStamp);
-            	}
-            }
-            finally {
-                // This client is going down! Remove its name and its print writer from the sets, and close its socket.
-                if (username != null && !isFailedConnection) {
-                    names.remove(username);
-                }
-                if (out != null && !isFailedConnection) {
-                    writers.remove(out);
-                }
-                try {
-                    socket.close();
-                }
-                catch (IOException e) {
-                	//catch nothing!!!!!
-                }
+            	e.printStackTrace();
             }
         }
     }

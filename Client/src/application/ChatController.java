@@ -46,8 +46,8 @@ public class ChatController {
 	private ArrayList <String> colorList = new ArrayList<>();
 	private BufferedReader in;
 	private Socket socket;
-	private PrintWriter out;
 	private boolean muted = false;
+	private static PrintWriter out;
 
 	private RSAPublicKey userPubKey;
 	private RSAPrivateKey userPrivKey;
@@ -76,7 +76,7 @@ public class ChatController {
 				// Make connection and initialize streams
 				Scanner scanner = null;
 			    String serverAddress = user.getServer();
-
+			    
 			    try {
 			    	//generate and store public and private keys
 			    	KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
@@ -111,67 +111,67 @@ public class ChatController {
 			    out.println(RSA.encrypt(serverPubKey, Base64.getEncoder().encodeToString(userAesKey)));
 
 			    // Process all messages from server, according to the protocol.
-			        while (true) {
-			            String line = AES.decrypt(serverAesKey, in.readLine());
+		        while (true) {
+		            String line = AES.decrypt(serverAesKey, in.readLine());
 
-				        if(line != null) {
-				        	scanner = new Scanner(line);
+			        if(line != null) {
+			        	scanner = new Scanner(line);
 
-				            if (line.startsWith("MESSAGE")) {
-				            	addChatMessage(scanner);
-				            	if(!muted && !line.startsWith("MESSAGE " + user.getName())) {
-				            		playSound("notification.wav");
-				            	}
-				            }
-				            else if(line.startsWith("USER-UPDATE-MESSAGE") || line.startsWith("DISCONNECTED-MESSAGE")) {
-				            	addChatMessage(scanner);
-				            	if(!muted) {
-				            		playSound("connection.wav");
-				            	}
-				            }
-				            else if (line.startsWith("CONNECTED")) {
-				                input.setEditable(true);
-				            }
-				            else if (line.startsWith("REQUESTNAME")) {
-				            	sendMessage(out, user.getName() + " " + user.getColor());
-				            }
-				            else if(line.startsWith("NEWUSER")){
-				            	scanner.next(); //eats NEWUSER
-				            	nameList.add(scanner.next()); //gets name
-				            	colorList.add(scanner.next()); //gets color
+			            if (line.startsWith("MESSAGE")) {
+			            	addChatMessage(scanner);
+			            	if(!muted && !line.startsWith("MESSAGE " + user.getName())) {
+			            		playSound("notification.wav");
+			            	}
+			            }
+			            else if(line.startsWith("USER-UPDATE-MESSAGE") || line.startsWith("DISCONNECTED-MESSAGE")) {
+			            	addChatMessage(scanner);
+			            	if(!muted) {
+			            		playSound("connection.wav");
+			            	}
+			            }
+			            else if (line.startsWith("CONNECTED")) {
+			                input.setEditable(true);
+			            }
+			            else if (line.startsWith("REQUESTNAME")) {
+			            	sendMessage(out, user.getName() + " " + user.getColor());
+			            }
+			            else if(line.startsWith("NEWUSER")){
+			            	scanner.next(); //eats NEWUSER
+			            	nameList.add(scanner.next()); //gets name
+			            	colorList.add(scanner.next()); //gets color
 
-				            	Platform.runLater (() -> updateUserList());
-				            }
-				            else if(line.startsWith("REMOVEUSER")){
-				            	scanner.next(); //eats REMOVEUSER
-				            	String nameToRemove = scanner.next(); //get user name
+			            	Platform.runLater (() -> updateUserList());
+			            }
+			            else if(line.startsWith("REMOVEUSER")){
+			            	scanner.next(); //eats REMOVEUSER
+			            	String nameToRemove = scanner.next(); //get user name
 
-				            	scanner.nextLine(); //clear rest of line
+			            	scanner.nextLine(); //clear rest of line
 
-				            	int i = nameList.indexOf(nameToRemove);
-				            	nameList.remove(i);
-				            	colorList.remove(i);
+			            	int i = nameList.indexOf(nameToRemove);
+			            	nameList.remove(i);
+			            	colorList.remove(i);
 
-				            	Platform.runLater (() -> updateUserList());
-				            }
-				            else if(line.startsWith("REQUESTPASSWORD")) {
-				            	sendMessage(out, user.getPassword());
-				            }
-				            else if(line.startsWith("DUPLICATE-USERNAME")) {
-				            	goBackToInfoController("Duplicate username, enter another.");
-				            }
-				            else if(line.startsWith("INCORRECT-PASSWORD")) {
-				            	goBackToInfoController("Incorrect password, try again.");
-				            }
-				            scanner.close();
-				        } //end if statement
-			        } //end while statement
-			    }
-			};
-			Thread th = new Thread(task);
-			th.setDaemon(true);
-			th.start();
-
+		            	Platform.runLater (() -> updateUserList());
+			            }
+			            else if(line.startsWith("REQUESTPASSWORD")) {
+			            	sendMessage(out, user.getPassword());
+			            }
+			            else if(line.startsWith("DUPLICATE-USERNAME")) {
+			            	goBackToInfoController("Duplicate username, enter another.");
+			            }
+			            else if(line.startsWith("INCORRECT-PASSWORD")) {
+			            	goBackToInfoController("Incorrect password, try again.");
+			            }
+			            scanner.close();
+			        } //end if statement
+		        } //end while statement
+		    }
+		};
+		Thread th = new Thread(task);
+		th.setDaemon(true);
+		th.start();
+		
         input.setOnKeyPressed(e -> {
         	if (e.getCode() == KeyCode.ESCAPE){
         		chatFlow.getChildren().clear();
@@ -191,6 +191,16 @@ public class ChatController {
 				input.clear();
 			}
         });
+        
+        Platform.runLater(() -> {
+	        Stage stage = (Stage) root.getScene().getWindow();
+	        
+			stage.setOnCloseRequest(e -> {
+				sendMessage(out, "CLOSING-CLIENT");
+				out.close();
+			});
+        });
+		
     } //end init
 
     private void updateUserList() {
