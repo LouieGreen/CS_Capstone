@@ -30,6 +30,5 @@ If a port is not specified or the specified port is invaild the server deafaults
 ## Hiddden Features
 When in messaging client:
 
-**CTRL + M:** mutes notification noises, such as getting new messages and users connecting/disconnecting.
-
-**Escape:** clears all chat messages from the screen.
+* **CTRL + M:** mutes notification noises, such as getting new messages and users connecting/disconnecting.
+* **Escape:** clears all chat messages from the screen.
