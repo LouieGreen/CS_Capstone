@@ -24,4 +24,12 @@ java -jar Server.jar "PASSWORD"         - port 5000, specified password
 java -jar Server.jar "PASSWORD" "PORT"  - specified password, specified port
 java -jar Server.jar "PORT" "PASSWORD"  - specified port, specified password
 ```
+
 If a port is not specified or the specified port is invaild the server deafaults to running on port 5000. If the password is not specified the password defaults to no password.
+
+## Hiddden Features
+When in messaging client:
+
+**CTRL + M: ** mutes notification noises, such as getting new messages and users connecting/disconnecting.
+
+**Escape: ** clears all chat messages from the screen.
