@@ -115,20 +115,23 @@ public class Server {
                 //get user public key
                 byte[] userPubKeyBytes = Base64.getDecoder().decode(in.readLine());
 				userPubKey = (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(userPubKeyBytes));
-
-                //send and receive AES keys
-                out.println(RSA.encrypt(userPubKey, Base64.getEncoder().encodeToString(serverAesKey)));
-                userAesKey = Base64.getDecoder().decode(RSA.decrypt(serverPrivKey, in.readLine()));
-
-                //request password
-                sendMessage(out, "REQUESTPASSWORD");
-                String userEnteredPassword = AES.decrypt(userAesKey, in.readLine());
-                if(!userEnteredPassword.equals(connectPassword)) {
-                	sendMessage(out, "INCORRECT-PASSWORD");
+				
+				//request password before sending AES key
+				String userEnteredPassword = RSA.decrypt(serverPrivKey, in.readLine());
+				
+				if(!userEnteredPassword.equals(connectPassword)) {
+					out.println(RSA.encrypt(userPubKey, "INCORRECT-PASSWORD"));
                 	isFailedConnection = true;
                 }
-
+				else {
+					out.println(RSA.encrypt(userPubKey, "CORRECT-PASSWORD"));
+				}
+				
                 if(!isFailedConnection) {
+                	//send and receive AES keys
+                    out.println(RSA.encrypt(userPubKey, Base64.getEncoder().encodeToString(serverAesKey)));
+                    userAesKey = Base64.getDecoder().decode(RSA.decrypt(serverPrivKey, in.readLine()));
+                    
 	                //get user info and add them to list
 	                sendMessage(out, "REQUESTNAME");
 	                username = AES.decrypt(userAesKey, in.readLine());

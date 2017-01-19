@@ -98,6 +98,13 @@ public class ChatController {
 			    byte[] serverPubKeyBytes = Base64.getDecoder().decode(in.readLine());
 			    serverPubKey = (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(serverPubKeyBytes));
 			    out.println(Base64.getEncoder().encodeToString(userPubKey.getEncoded()));
+			    
+			    //send password over to server
+			    out.println(RSA.encrypt(serverPubKey, user.getPassword()));
+			    String isCorrectOrNot = RSA.decrypt(userPrivKey, in.readLine());
+			    if(isCorrectOrNot.equals("INCORRECT-PASSWORD")) {
+			    	goBackToInfoController("Incorrect password, try again.");
+			    }
 
 			    //create SecureRandom object with random seed
 			    byte seed[] = random.generateSeed(20);
@@ -135,14 +142,14 @@ public class ChatController {
 			            else if (line.startsWith("REQUESTNAME")) {
 			            	sendMessage(out, user.getName() + " " + user.getColor());
 			            }
-			            else if(line.startsWith("NEWUSER")){
+			            else if(line.startsWith("NEWUSER")) {
 			            	scanner.next(); //eats NEWUSER
 			            	nameList.add(scanner.next()); //gets name
 			            	colorList.add(scanner.next()); //gets color
 
 			            	Platform.runLater (() -> updateUserList());
 			            }
-			            else if(line.startsWith("REMOVEUSER")){
+			            else if(line.startsWith("REMOVEUSER")) {
 			            	scanner.next(); //eats REMOVEUSER
 			            	String nameToRemove = scanner.next(); //get user name
 
@@ -152,16 +159,10 @@ public class ChatController {
 			            	nameList.remove(i);
 			            	colorList.remove(i);
 
-		            	Platform.runLater (() -> updateUserList());
-			            }
-			            else if(line.startsWith("REQUESTPASSWORD")) {
-			            	sendMessage(out, user.getPassword());
+			            	Platform.runLater (() -> updateUserList());
 			            }
 			            else if(line.startsWith("DUPLICATE-USERNAME")) {
 			            	goBackToInfoController("Duplicate username, enter another.");
-			            }
-			            else if(line.startsWith("INCORRECT-PASSWORD")) {
-			            	goBackToInfoController("Incorrect password, try again.");
 			            }
 			            scanner.close();
 			        } //end if statement
@@ -173,7 +174,7 @@ public class ChatController {
 		th.start();
 		
         input.setOnKeyPressed(e -> {
-        	if (e.getCode() == KeyCode.ESCAPE){
+        	if (e.getCode() == KeyCode.ESCAPE) {
         		chatFlow.getChildren().clear();
 			}
 
@@ -181,7 +182,7 @@ public class ChatController {
 				muted = !muted;
 			}
 
-			if((e.getCode() == KeyCode.ENTER) && !kb.match(e)){
+			if((e.getCode() == KeyCode.ENTER) && !kb.match(e)) {
 				String userText = input.getText();
 				if(userText.trim().length() > 0) {
 					sendMessage(out, userText);
