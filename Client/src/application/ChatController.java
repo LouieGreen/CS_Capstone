@@ -48,6 +48,9 @@ public class ChatController {
 	private Socket socket;
 	private boolean muted = false;
 	private static PrintWriter out;
+	
+	private ArrayList<String> previousMessages = new ArrayList<>();
+	private int position = 0;
 
 	private RSAPublicKey userPubKey;
 	private RSAPrivateKey userPrivKey;
@@ -181,12 +184,32 @@ public class ChatController {
 			if(kb.match(e)){
 				muted = !muted;
 			}
+			
+			if (e.getCode() == KeyCode.UP) {
+				if(!previousMessages.isEmpty() && position >= 0 && position < previousMessages.size()) {
+					position++;
+					input.clear();
+					input.setText(previousMessages.get(position));
+					input.positionCaret(input.getText().length());
+				}
+			}
+			
+			if (e.getCode() == KeyCode.DOWN) {
+				if(!previousMessages.isEmpty() && position >= 0 && position <= previousMessages.size()) {
+					position--;
+					input.clear();
+					input.setText(previousMessages.get(position));
+					input.positionCaret(input.getText().length());
+				}
+			}
 
 			if((e.getCode() == KeyCode.ENTER) && !kb.match(e)) {
 				String userText = input.getText();
 				if(userText.trim().length() > 0) {
+					previousMessages.add(userText);
 					sendMessage(out, userText);
 					chatScroll.setVvalue(1);
+					position=0;
 				}
 				e.consume();
 				input.clear();
