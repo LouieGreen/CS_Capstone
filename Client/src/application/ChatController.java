@@ -51,6 +51,7 @@ public class ChatController {
 	
 	private ArrayList<String> previousMessages = new ArrayList<>();
 	private int position = 0;
+	private int pressedPrevious = 0;
 
 	private RSAPublicKey userPubKey;
 	private RSAPrivateKey userPrivKey;
@@ -92,7 +93,8 @@ public class ChatController {
 					socket = new Socket(serverAddress, user.getPort());
 					in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					out = new PrintWriter(socket.getOutputStream(), true);
-				} catch (Exception e) {
+				}
+			    catch (Exception e) {
 					Platform.runLater (() -> input.setText("Failed to connect to: " + serverAddress + ":" + user.getPort()));
 				}
 
@@ -187,19 +189,27 @@ public class ChatController {
 			
 			if (e.getCode() == KeyCode.UP) {
 				if(!previousMessages.isEmpty() && position >= 0 && position < previousMessages.size()) {
-					position++;
+					if(pressedPrevious==1) {
+						position++;
+					}
 					input.clear();
 					input.setText(previousMessages.get(position));
 					input.positionCaret(input.getText().length());
+					position++;
+					pressedPrevious=2;
 				}
 			}
 			
 			if (e.getCode() == KeyCode.DOWN) {
-				if(!previousMessages.isEmpty() && position >= 0 && position <= previousMessages.size()) {
+				if(!previousMessages.isEmpty() && position >= 1 && position <= previousMessages.size()) {
+					if(pressedPrevious==2) {
+						position--;
+					}
 					position--;
 					input.clear();
 					input.setText(previousMessages.get(position));
 					input.positionCaret(input.getText().length());
+					pressedPrevious=1;
 				}
 			}
 
