@@ -188,6 +188,19 @@ public class ChatController {
 			}
 			
 			if (e.getCode() == KeyCode.UP) {
+				if(!previousMessages.isEmpty() && position >= 1 && position <= previousMessages.size()) {
+					if(pressedPrevious == 2) {
+						position--;
+					}
+					position--;
+					input.clear();
+					input.setText(previousMessages.get(position));
+					input.positionCaret(input.getText().length());
+					pressedPrevious=1;
+				}
+			}
+			
+			if (e.getCode() == KeyCode.DOWN) {
 				if(!previousMessages.isEmpty() && position >= 0 && position < previousMessages.size()) {
 					if(pressedPrevious==1) {
 						position++;
@@ -200,26 +213,14 @@ public class ChatController {
 				}
 			}
 			
-			if (e.getCode() == KeyCode.DOWN) {
-				if(!previousMessages.isEmpty() && position >= 1 && position <= previousMessages.size()) {
-					if(pressedPrevious==2) {
-						position--;
-					}
-					position--;
-					input.clear();
-					input.setText(previousMessages.get(position));
-					input.positionCaret(input.getText().length());
-					pressedPrevious=1;
-				}
-			}
-
 			if((e.getCode() == KeyCode.ENTER) && !kb.match(e)) {
 				String userText = input.getText();
 				if(userText.trim().length() > 0) {
 					previousMessages.add(userText);
 					sendMessage(out, userText);
 					chatScroll.setVvalue(1);
-					position=0;
+					position=previousMessages.size();
+					pressedPrevious=0;
 				}
 				e.consume();
 				input.clear();
