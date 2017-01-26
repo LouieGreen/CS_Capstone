@@ -32,3 +32,4 @@ When in messaging client:
 
 * **CTRL + M:** mutes notification noises, such as getting new messages and users connecting/disconnecting.
 * **Escape:** clears all chat messages from the screen.
+* **UP/DOWN arrow:** history feature
