@@ -14,6 +14,8 @@ This project is meant to be coded completely in Java and not to use any outside 
 ## Setup and use
 **Java 8 must be installed on both the client and the server. Depending on the OS of the computer running the server the Java JDK might be necessary.**
 
+**Recently trying to run this on Ubuntu 16.04 LTS has yeilded some issues, they were caused by the Java install packages lacking (for some reason) the JavaFX packages... They can be installed by: sudo apt-get install openjfx**
+
 To use this project there needs to be a server setup and running, this server either needs to be on your local network or be addressable via IP address and have the desired port port-forwarded to the server.
 
 To run the server on a desired port the port with the desired password, they must be passed in via the command-line as shown below, the order does not matter (batch included file for use on Windows machines):
