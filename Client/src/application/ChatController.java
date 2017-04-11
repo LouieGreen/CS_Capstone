@@ -51,7 +51,6 @@ public class ChatController {
 	
 	private ArrayList<String> previousMessages = new ArrayList<>();
 	private int position = 0;
-	private int pressedPrevious = 0;
 
 	private RSAPublicKey userPubKey;
 	private RSAPrivateKey userPrivKey;
@@ -93,8 +92,7 @@ public class ChatController {
 					socket = new Socket(serverAddress, user.getPort());
 					in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					out = new PrintWriter(socket.getOutputStream(), true);
-				}
-			    catch (Exception e) {
+				} catch (Exception e) {
 					Platform.runLater (() -> input.setText("Failed to connect to: " + serverAddress + ":" + user.getPort()));
 				}
 
@@ -188,39 +186,30 @@ public class ChatController {
 			}
 			
 			if (e.getCode() == KeyCode.UP) {
-				if(!previousMessages.isEmpty() && position >= 1 && position <= previousMessages.size()) {
-					if(pressedPrevious == 2) {
-						position--;
-					}
-					position--;
+				if(!previousMessages.isEmpty() && position >= 0 && position < previousMessages.size()) {
+					position++;
 					input.clear();
 					input.setText(previousMessages.get(position));
 					input.positionCaret(input.getText().length());
-					pressedPrevious=1;
 				}
 			}
 			
 			if (e.getCode() == KeyCode.DOWN) {
-				if(!previousMessages.isEmpty() && position >= 0 && position < previousMessages.size()) {
-					if(pressedPrevious==1) {
-						position++;
-					}
+				if(!previousMessages.isEmpty() && position >= 0 && position <= previousMessages.size()) {
+					position--;
 					input.clear();
 					input.setText(previousMessages.get(position));
 					input.positionCaret(input.getText().length());
-					position++;
-					pressedPrevious=2;
 				}
 			}
-			
+
 			if((e.getCode() == KeyCode.ENTER) && !kb.match(e)) {
 				String userText = input.getText();
 				if(userText.trim().length() > 0) {
 					previousMessages.add(userText);
 					sendMessage(out, userText);
 					chatScroll.setVvalue(1);
-					position=previousMessages.size();
-					pressedPrevious=0;
+					position=0;
 				}
 				e.consume();
 				input.clear();
