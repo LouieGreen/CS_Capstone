@@ -27,7 +27,11 @@ public class Main extends Application {
 			Scene scene = new Scene(info);
 
 			primaryStage.setTitle("Chat Client");
-			primaryStage.getIcons().add(new Image("resources/icon.png")); // borrowed from http://wfarm3.dataknet.com/static/resources/icons/set99/c42baec7.png
+			primaryStage.getIcons().add(primaryStage.getIcons().addAll(
+					new Image("resources/icon512.png"),
+					new Image("resources/icon128.png"),
+					new Image("resources/icon64.png"),
+					new Image("resources/icon32.png") ); // borrowed from http://wfarm3.dataknet.com/static/resources/icons/set99/c42baec7.png
 			primaryStage.setScene(scene);
 			primaryStage.show();
 
