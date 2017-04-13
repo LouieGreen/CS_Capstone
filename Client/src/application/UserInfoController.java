@@ -30,6 +30,7 @@ import javafx.stage.Stage;
 
 public class UserInfoController {
 
+	// create the global objects for future use //
 	private static User user = new User();
 	private static boolean failedConnection = false;
 	private static boolean isIncorretPassword = false;
@@ -66,6 +67,8 @@ public class UserInfoController {
 
     @FXML
     void initialize() {
+
+
     	String operatingSystem = System.getProperty("os.name");
     	File settingsFile = new File(".savedSettings.txt");
     	Path pathToSettingsFile = FileSystems.getDefault().getPath(".savedSettings.txt");
@@ -74,7 +77,7 @@ public class UserInfoController {
     		String colorFromFile = null;
     		Scanner input = null;
 
-    		//check if files exists
+    		//check if files settingsFile exists and if so load in settings
     		if(settingsFile.exists()){
     			input = new Scanner(settingsFile);
     			serverText.setText(input.nextLine());
@@ -99,27 +102,36 @@ public class UserInfoController {
     		purpleButton.setUserData("Purple");
     		redButton.setUserData("Red");
 
-    		//allows toggle of hidden password
+    		//allows toggle of hidden password for password checking
     		showPassword.setFocusTraversable(false);
     		plainTextPassword.setManaged(passwordIsHidden);
     		plainTextPassword.setVisible(passwordIsHidden);
     		plainTextPassword.textProperty().bindBidirectional(passwordText.textProperty());
 
+			//listener for when the show password button is clicked to reverse it
     		showPassword.setOnAction(e -> {
     			passwordIsHidden = !passwordIsHidden;
     			plainTextPassword.setManaged(passwordIsHidden);
         		plainTextPassword.setVisible(passwordIsHidden);
     		});
 
+			//listener for the submit button click
     		submit.setOnAction(e -> {
-    			//check server field is filled in --     check username is filled in and that the field isn't just spaces --         check the port field is filled   -- check color is selected
+    			//check server field is filled in -- check username is filled in -- check that the field isn't just spaces -- check the port field is filled -- check color is selected
     			if(serverText.getText().length() != 0 && userText.getText().length() != 0 && !userText.getText().trim().isEmpty() && portText.getText().length() != 0 && color.getSelectedToggle() != null) {
-    				Integer port = new Integer(portText.getText().trim());
+
+					//convert port text to integer and set user object info for use later
+					//remove spaces from username because they break things
+					//get the server name entered
+					//get the color the user would like to use
+
+					Integer port = new Integer(portText.getText().trim());
     				user.setPort(port);
     				user.setName(userText.getText().replaceAll(" ", ""));
     				user.setServer(serverText.getText().trim());
     				user.setColor(color.getSelectedToggle().getUserData().toString());
 
+					//password is allowed to be blank so test to see if it is, if not get the users
     				if(passwordText.getText().length() == 0) {
     					user.setPassword(new String(""));
     				}
@@ -127,15 +139,18 @@ public class UserInfoController {
     					user.setPassword(passwordText.getText().trim());
     				}
 
-    				//save settings to file
+    				//save settings to hidden file (Windows is picky so a special case for it)
     				if(saveButton.isSelected()) {
     					try {
+							//if it is Windows we need to unhide the file before we can change it (if it exists)
     						if(settingsFile.exists() && operatingSystem.contains("Windows")) {
     							Files.setAttribute(pathToSettingsFile, "dos:hidden", false);
     						}
+							//write UserInfo to the file
     						PrintWriter p = new PrintWriter(settingsFile);
     						p.println(user.getServer() + "\n" + user.getName() + "\n" + user.getPort() + "\n"  + user.getColor());
     						p.close();
+							//if Windows set file to hidden again
     						if(operatingSystem.contains("Windows")) {
     							Files.setAttribute(pathToSettingsFile, "dos:hidden", true);
     						}
@@ -146,14 +161,16 @@ public class UserInfoController {
 							e1.printStackTrace();
 						}
     				}
+					//if user selects to delete the settingsFile this deletes it
     				else if(deletButton.isSelected()){
     					if(settingsFile.exists()){
     						settingsFile.delete();
     					}
     				}
+
+					//closes UserInfo stage and attempts to load the Chat stage
     				Stage stage = (Stage) submit.getScene().getWindow();
     				stage.close();
-
     				try {
 						URL fxmlUrlChat = this.getClass().getClassLoader().getResource("resources/chat.fxml");
 						Pane chat = FXMLLoader.<Pane> load(fxmlUrlChat);
@@ -166,10 +183,12 @@ public class UserInfoController {
 					}
     			}
     			else {
+					//if the user is missing a field then this is shown
     				notFinished.setOpacity(1);
     			}
     		});
 
+			//these is used for when the user is kicked back from being denied from the server
     		if(failedConnection) {
     			notFinished.setOpacity(1);
     			notFinished.setFont(new Font(16));
@@ -194,20 +213,19 @@ public class UserInfoController {
     	}
     }
 
+	//these are the functions used by the chatcontroller to tell the user what happemed
     protected static void setIncorretPassword(boolean flag){
     	isIncorretPassword = flag;
     }
     protected static boolean getIncorrectPassword() {
     	return isIncorretPassword;
     }
-
     protected static void setDuplicateUser(boolean flag) {
     	failedConnection = flag;
 	}
     protected static boolean getDuplicateUser() {
     	return failedConnection;
     }
-
 	protected static User getUser() {
     	return user;
     }

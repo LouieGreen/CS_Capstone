@@ -48,7 +48,7 @@ public class ChatController {
 	private Socket socket;
 	private boolean muted = false;
 	private static PrintWriter out;
-	
+
 	private ArrayList<String> previousMessages = new ArrayList<>();
 	private int position = 0;
 
@@ -73,13 +73,14 @@ public class ChatController {
 
     @FXML
     void initialize() {
+
+		//all of this is in a task because that is the way I figured out how Java does concurrency, this gets handed off to be its own thread. this thread handles all the recieving of messages
         Task<Void> task = new Task<Void>() {
 			@Override
 			public Void call() throws Exception {
-				// Make connection and initialize streams
 				Scanner scanner = null;
 			    String serverAddress = user.getServer();
-			    
+
 			    try {
 			    	//generate and store public and private keys
 			    	KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
@@ -101,7 +102,7 @@ public class ChatController {
 			    byte[] serverPubKeyBytes = Base64.getDecoder().decode(in.readLine());
 			    serverPubKey = (RSAPublicKey) KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(serverPubKeyBytes));
 			    out.println(Base64.getEncoder().encodeToString(userPubKey.getEncoded()));
-			    
+
 			    //send password over to server
 			    out.println(RSA.encrypt(serverPubKey, user.getPassword()));
 			    String isCorrectOrNot = RSA.decrypt(userPrivKey, in.readLine());
@@ -120,7 +121,7 @@ public class ChatController {
 			    serverAesKey = Base64.getDecoder().decode(RSA.decrypt(userPrivKey, in.readLine()));
 			    out.println(RSA.encrypt(serverPubKey, Base64.getEncoder().encodeToString(userAesKey)));
 
-			    // Process all messages from server, according to the protocol.
+			    // Process all messages from server, according to the protocol. (pretty self explanatory)
 		        while (true) {
 		            String line = AES.decrypt(serverAesKey, in.readLine());
 
@@ -155,7 +156,6 @@ public class ChatController {
 			            else if(line.startsWith("REMOVEUSER")) {
 			            	scanner.next(); //eats REMOVEUSER
 			            	String nameToRemove = scanner.next(); //get user name
-
 			            	scanner.nextLine(); //clear rest of line
 
 			            	int i = nameList.indexOf(nameToRemove);
@@ -175,16 +175,20 @@ public class ChatController {
 		Thread th = new Thread(task);
 		th.setDaemon(true);
 		th.start();
-		
+
+		//this is the thread that handles user input
         input.setOnKeyPressed(e -> {
+			//excape clears chat
         	if (e.getCode() == KeyCode.ESCAPE) {
         		chatFlow.getChildren().clear();
 			}
 
+			// ctrl+m mutes and unmutes chat notifications
 			if(kb.match(e)){
 				muted = !muted;
 			}
-			
+
+			//arrow up moves through old sent messages
 			if (e.getCode() == KeyCode.UP) {
 				if(!previousMessages.isEmpty() && position >= 0 && position < previousMessages.size()) {
 					position++;
@@ -193,7 +197,8 @@ public class ChatController {
 					input.positionCaret(input.getText().length());
 				}
 			}
-			
+
+			//arrow down move through old sent messages
 			if (e.getCode() == KeyCode.DOWN) {
 				if(!previousMessages.isEmpty() && position >= 0 && position <= previousMessages.size()) {
 					position--;
@@ -203,6 +208,7 @@ public class ChatController {
 				}
 			}
 
+			//enter sends typed messages
 			if((e.getCode() == KeyCode.ENTER) && !kb.match(e)) {
 				String userText = input.getText();
 				if(userText.trim().length() > 0) {
@@ -215,10 +221,11 @@ public class ChatController {
 				input.clear();
 			}
         });
-        
+
+		//I needed a neat way to close a client session, so when the user requests to close the window, one more message is sent letting the server know
         Platform.runLater(() -> {
 	        Stage stage = (Stage) root.getScene().getWindow();
-	        
+
 			stage.setOnCloseRequest(e -> {
 				if(out != null){
 					sendMessage(out, "CLOSING-CLIENT");
@@ -227,9 +234,10 @@ public class ChatController {
 				Platform.exit();
 			});
         });
-		
+
     } //end init
 
+	//when a user connects or leaves the userList needs to be updated... Clear list, then loop over list and readd them
     private void updateUserList() {
     	namesFlow.getChildren().clear();
 
@@ -241,6 +249,7 @@ public class ChatController {
 		}
 	}
 
+	//this function adds messages to the chat pane
     private void addChatMessage(Scanner scanner) {
     	String header = scanner.next(); //eats header message
     	String inUserName = scanner.next(); // gets name
@@ -259,9 +268,11 @@ public class ChatController {
     		chatFlow.getChildren().add(t); //add to chat
     		chatScroll.setVvalue(1); //set scroll to bottom so it scrolls with text
     	});
-    }
+    } //addChatMessage
 
+	//this function will kick the user back to the uerInfo window
     private void goBackToInfoController(String text) {
+		//sets the appropiate flag in the userInfo window and resets the other
     	if(text.startsWith("Duplicate")) {
     		if(UserInfoController.getIncorrectPassword()) {
     			UserInfoController.setIncorretPassword(false);
@@ -275,6 +286,7 @@ public class ChatController {
     		UserInfoController.setIncorretPassword(true);
     	}
 
+		//loads the userInfo window and closes this one
     	Platform.runLater (() -> {
     		try {
             	Stage stage = (Stage) root.getScene().getWindow();
@@ -289,12 +301,14 @@ public class ChatController {
     			e.printStackTrace();
     		}
     	});
-    }
+    } //end goBackToInfoController
 
+	//this was abstracted out so the same piece of code wasn't being copied over and over
     private void sendMessage(PrintWriter out, String message) {
     	out.println(AES.encrypt(userAesKey, AES.getInitVector(random), message));
     }
 
+	//plays the various sounds depending on what is passed in
     private static synchronized void playSound(String file) {
     	new Thread(new Runnable() {
     		public void run() {
@@ -309,5 +323,5 @@ public class ChatController {
     			}
     		}
     	}).start();
-    }
-}
+    } //end playSound
+} //end class

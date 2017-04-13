@@ -18,9 +18,9 @@ import javax.crypto.spec.PSource.PSpecified;
 
 public class RSA {
 
+    //encrypts message, returns encrypted message, encoded in Base64
     public static String encrypt(RSAPublicKey pubkey, String message) {
     	byte[] enc = null;
-
         try {
 			Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
 			cipher.init(Cipher.ENCRYPT_MODE, pubkey);
@@ -36,11 +36,11 @@ public class RSA {
         return Base64.getEncoder().encodeToString(enc);
     }
 
+    //decrypts message, returns plainText message, encoded in UTF_8
     public static String decrypt(RSAPrivateKey privateKey, String encryptedMessage) {
     	byte[] plainText = null;
-
     	try {
-			Cipher oaepFromInit = Cipher.getInstance("RSA/ECB/OAEPPadding");
+			Cipher oaepFromInit = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
 			OAEPParameterSpec oaepParams = new OAEPParameterSpec("SHA-256", "MGF1", new MGF1ParameterSpec("SHA-1"), PSpecified.DEFAULT);
 			oaepFromInit.init(Cipher.DECRYPT_MODE, privateKey, oaepParams);
 
