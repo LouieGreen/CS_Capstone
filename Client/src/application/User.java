@@ -1,5 +1,7 @@
 package application;
 
+import java.security.MessageDigest;
+
 public class User {
 	private String userServer = null;
 	private String userName = null;
@@ -27,45 +29,51 @@ public class User {
 
    ///////			  Setters			///////
 
-	public void setServer(String server){
+	public void setServer(String server) {
 		userServer = server;
 	}
 
-	public void setName(String name){
+	public void setName(String name) {
 		userName = name;
 	}
 
-	public void setColor(String color){
+	public void setColor(String color) {
 		userColor = color;
 	}
 
-	public void setPassword(String pass){
-		userPass = pass;
+	public void setPassword(String pass) {
+		if(pass.lenth() != 0) {
+			MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+			messageDigest.update(pass.getBytes());
+			String encryptedString = new String(messageDigest.digest());
+			System.out.println(encryptedString);
+		}
+		userPass = encryptedString;
 	}
 
-	public void setPort(int port){
+	public void setPort(int port) {
 		userPort = port;
 	}
 
    ///////			  Getters			///////
 
-	public String getServer(){
+	public String getServer() {
 		return userServer;
 	}
 
-	public String getName(){
+	public String getName() {
 		return userName;
 	}
 
-	public String getColor(){
+	public String getColor() {
 		return userColor;
 	}
 
-	public String getPassword(){
+	public String getPassword() {
 		return userPass;
 	}
 
-	public int getPort(){
+	public int getPort() {
 		return userPort;
 	}
 

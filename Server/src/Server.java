@@ -63,6 +63,13 @@ public class Server {
     		System.out.println("Server started, no password: " + ipAddress + ":" + portNum + "\n");
     	}
 
+        //hash password for checking against user password
+        if(connectPassword.lenth() != 0) {
+			MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+			messageDigest.update(pass.getBytes());
+			String connectPassword = new String(messageDigest.digest());
+		}
+
         //setup server keys, 2048 bit RSA
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
         keyGen.initialize(2048);
