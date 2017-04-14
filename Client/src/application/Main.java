@@ -27,7 +27,7 @@ public class Main extends Application {
 			Scene scene = new Scene(info);
 
 			primaryStage.setTitle("Chat Client");
-			primaryStage.getIcons().add(primaryStage.getIcons().addAll(
+			primaryStage.getIcons().addAll(
 					new Image("resources/icon512.png"),
 					new Image("resources/icon128.png"),
 					new Image("resources/icon64.png"),

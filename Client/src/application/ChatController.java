@@ -51,6 +51,7 @@ public class ChatController {
 
 	private ArrayList<String> previousMessages = new ArrayList<>();
 	private int position = 0;
+	private int pressedPrevious = 0;
 
 	private RSAPublicKey userPubKey;
 	private RSAPrivateKey userPrivKey;
@@ -190,21 +191,29 @@ public class ChatController {
 
 			//arrow up moves through old sent messages
 			if (e.getCode() == KeyCode.UP) {
-				if(!previousMessages.isEmpty() && position >= 0 && position < previousMessages.size()) {
-					position++;
+				if(!previousMessages.isEmpty() && position >= 1 && position <= previousMessages.size()) {
+					if(pressedPrevious == 2) {
+						position--;
+					}
+					position--;
 					input.clear();
 					input.setText(previousMessages.get(position));
 					input.positionCaret(input.getText().length());
+					pressedPrevious=1;
 				}
 			}
 
 			//arrow down move through old sent messages
 			if (e.getCode() == KeyCode.DOWN) {
-				if(!previousMessages.isEmpty() && position >= 0 && position <= previousMessages.size()) {
-					position--;
+				if(!previousMessages.isEmpty() && position >= 0 && position < previousMessages.size()) {
+					if(pressedPrevious==1) {
+						position++;
+					}
 					input.clear();
 					input.setText(previousMessages.get(position));
 					input.positionCaret(input.getText().length());
+					position++;
+					pressedPrevious=2;
 				}
 			}
 
@@ -215,7 +224,8 @@ public class ChatController {
 					previousMessages.add(userText);
 					sendMessage(out, userText);
 					chatScroll.setVvalue(1);
-					position=0;
+					position=previousMessages.size();
+					pressedPrevious=0;
 				}
 				e.consume();
 				input.clear();
