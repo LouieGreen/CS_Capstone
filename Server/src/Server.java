@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -64,10 +65,11 @@ public class Server {
     	}
 
         //hash password for checking against user password
-        if(connectPassword.lenth() != 0) {
+        if(connectPassword.length() != 0) {
 			MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-			messageDigest.update(pass.getBytes());
-			String connectPassword = new String(messageDigest.digest());
+			messageDigest.update(connectPassword.getBytes());
+			connectPassword = new String(messageDigest.digest());
+			//System.out.println(connectPassword);
 		}
 
         //setup server keys, 2048 bit RSA
