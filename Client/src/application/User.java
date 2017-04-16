@@ -1,6 +1,7 @@
 package application;
 
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class User {
 	private String userServer = null;
@@ -42,13 +43,18 @@ public class User {
 	}
 
 	public void setPassword(String pass) {
-		if(pass.lenth() != 0) {
-			MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-			messageDigest.update(pass.getBytes());
-			String encryptedString = new String(messageDigest.digest());
-			System.out.println(encryptedString);
+		if(pass.length() != 0) {
+			try {
+				MessageDigest messageDigest;
+				messageDigest = MessageDigest.getInstance("SHA-256");
+				messageDigest.update(pass.getBytes());
+				pass = new String(messageDigest.digest());
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			}
+			//System.out.println(pass);
 		}
-		userPass = encryptedString;
+		userPass = pass;
 	}
 
 	public void setPort(int port) {
