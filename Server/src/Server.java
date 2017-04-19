@@ -67,9 +67,9 @@ public class Server {
         //hash password for checking against user password
         if(connectPassword.length() != 0) {
 			MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-			messageDigest.update(connectPassword.getBytes());
-			connectPassword = new String(messageDigest.digest());
-			System.out.println(connectPassword);
+			messageDigest.update(connectPassword.getBytes("UTF-8"));
+			connectPassword = Base64.getEncoder().encodeToString(messageDigest.digest());
+			//System.out.println(connectPassword);
 		}
 
         //setup server keys, 2048 bit RSA

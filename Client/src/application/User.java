@@ -3,6 +3,7 @@ package application;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 
 public class User {
 	private String userServer = null;
@@ -49,13 +50,13 @@ public class User {
 				MessageDigest messageDigest;
 				messageDigest = MessageDigest.getInstance("SHA-256");
 				messageDigest.update(pass.getBytes("UTF-8"));
-				pass = new String(messageDigest.digest());
+				pass = Base64.getEncoder().encodeToString(messageDigest.digest());
+				//System.out.println(pass);
 			} catch (NoSuchAlgorithmException e) {
 				e.printStackTrace();
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
-			System.out.println(pass);
 		}
 		userPass = pass;
 	}
