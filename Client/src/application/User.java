@@ -1,5 +1,6 @@
 package application;
 
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -47,9 +48,11 @@ public class User {
 			try {
 				MessageDigest messageDigest;
 				messageDigest = MessageDigest.getInstance("SHA-256");
-				messageDigest.update(pass.getBytes());
+				messageDigest.update(pass.getBytes("UTF-8"));
 				pass = new String(messageDigest.digest());
 			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
 			System.out.println(pass);

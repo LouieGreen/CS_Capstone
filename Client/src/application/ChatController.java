@@ -106,6 +106,7 @@ public class ChatController {
 
 			    //send password over to server
 			    out.println(RSA.encrypt(serverPubKey, user.getPassword()));
+			    System.out.println(user.getPassword());
 			    String isCorrectOrNot = RSA.decrypt(userPrivKey, in.readLine());
 			    if(isCorrectOrNot.equals("INCORRECT-PASSWORD")) {
 			    	goBackToInfoController("Incorrect password, try again.");

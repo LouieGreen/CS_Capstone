@@ -69,7 +69,7 @@ public class Server {
 			MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
 			messageDigest.update(connectPassword.getBytes());
 			connectPassword = new String(messageDigest.digest());
-			//System.out.println(connectPassword);
+			System.out.println(connectPassword);
 		}
 
         //setup server keys, 2048 bit RSA
