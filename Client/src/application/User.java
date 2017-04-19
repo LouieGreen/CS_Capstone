@@ -52,7 +52,7 @@ public class User {
 			} catch (NoSuchAlgorithmException e) {
 				e.printStackTrace();
 			}
-			//System.out.println(pass);
+			System.out.println(pass);
 		}
 		userPass = pass;
 	}
